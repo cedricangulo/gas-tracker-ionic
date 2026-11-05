@@ -1,0 +1,27 @@
+{
+  "singleQuote": true,
+  "printWidth": 100,
+  "endOfLine": "lf",
+  "plugins": ["@prettier/plugin-php"],
+  "overrides": [
+    {
+      "files": "*.php",
+      "options": {
+        "phpVersion": "8.2",
+        "tabWidth": 4
+      }
+    },
+    {
+      "files": "*.html",
+      "options": {
+        "parser": "angular"
+      }
+    },
+    {
+      "files": "*.webmanifest",
+      "options": {
+        "parser": "json"
+      }
+    }
+  ]
+}
