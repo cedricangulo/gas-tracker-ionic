@@ -1,0 +1,53 @@
+<ion-content
+  ><main class="page">
+    <header class="page-top">
+      <div>
+        <p class="eyebrow">Gas Tracker / Trends</p>
+        <h1>The bigger picture.</h1>
+        <p class="subheading">Small stops. Patterns over time.</p>
+      </div>
+      <span class="badge accent">{{ store.fills().length }} entries</span>
+    </header>
+    <app-sync-banner />
+    <div class="stack">
+      <app-chart-card
+        title="Distance per month"
+        [subtitle]="
+          estimates()
+            ? '* Estimated from liters and efficiency where odometer pairs are missing.'
+            : 'Odometer changes belong to the month of the later reading.'
+        "
+        [labels]="months()"
+        [values]="distances()"
+        unit="km"
+      />
+      <app-chart-card
+        title="Price per liter"
+        subtitle="Amount paid divided by recorded liters for each fill-up."
+        kind="line"
+        [labels]="fillDates()"
+        [values]="literPrices()"
+        unit="PHP/L"
+      />
+      <app-chart-card
+        title="Cost per kilometer"
+        subtitle="Gauge-based estimate: closing price per liter divided by stretch km/L."
+        kind="line"
+        [labels]="stretchDates()"
+        [values]="kilometerCosts()"
+        unit="PHP/km"
+      />
+      <app-chart-card
+        title="Monthly spend"
+        subtitle="Your total fuel spend, one month at a time."
+        [labels]="months()"
+        [values]="spend()"
+        unit="PHP"
+      />
+    </div>
+    <p class="footer-note">
+      Prices use recorded liters. Cost/km needs gauge readings, odometers and closing fill-up
+      liters.
+    </p>
+  </main></ion-content
+>

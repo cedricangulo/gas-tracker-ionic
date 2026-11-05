@@ -1,0 +1,19 @@
+<svg
+  viewBox="-8 0 270 102"
+  role="img"
+  [attr.aria-label]="
+    value() === null ? 'No efficiency reading yet' : value()!.toFixed(1) + ' kilometers per liter'
+  "
+>
+  @for (char of cells(); track $index; let i = $index) {
+    <g [attr.transform]="'translate(' + (i * 65 + (i === 3 ? 9 : 0)) + ' 0) skewX(-5)'">
+      @for (segment of segments; track segment.key) {
+        <polygon
+          [attr.points]="segment.points"
+          [attr.fill]="lit(char, segment.key) ? 'currentColor' : 'var(--digit-ghost)'"
+        />
+      }
+    </g>
+  }
+  <circle cx="190" cy="92" r="5" fill="currentColor" />
+</svg>

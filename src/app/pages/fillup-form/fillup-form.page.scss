@@ -1,0 +1,122 @@
+.form-page h1 {
+  font-size: 32px;
+}
+.page-top .eyebrow {
+  font-size: 9px;
+  margin-bottom: 7px;
+}
+.page-top .badge {
+  white-space: nowrap;
+}
+.entry-form > .form-error {
+  margin-bottom: 20px;
+}
+.amount-section {
+  padding: 14px 0 30px;
+}
+.amount-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 20px;
+}
+.amount-input > span {
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 40px;
+}
+.amount-input input {
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  font: 500 64px var(--mono);
+  color: var(--accent);
+  letter-spacing: -0.07em;
+  padding: 0;
+  min-width: 0;
+  height: 80px;
+}
+.quick-amounts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.quick-amounts .chip {
+  padding: 8px;
+}
+.section-heading h2 {
+  font-size: 25px;
+}
+.section-heading .eyebrow {
+  font-size: 9px;
+}
+.liters-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.liters-row input {
+  flex: 1;
+  min-width: 0;
+}
+.price-preview {
+  white-space: nowrap;
+  min-width: 100px;
+  text-align: right;
+  font-size: 14px;
+  color: var(--muted);
+}
+.gauge-field {
+  margin-top: 24px;
+}
+.gauge-selector .chip {
+  flex: 1;
+  padding: 8px 10px;
+  min-width: 35px;
+}
+.full-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 0 0;
+  cursor: pointer;
+  min-height: 62px;
+}
+.full-toggle strong {
+  font-size: 14px;
+}
+.full-toggle span {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 5px;
+}
+.location-confirm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 0;
+  color: var(--good);
+}
+.location-confirm div {
+  flex: 1;
+  min-width: 0;
+}
+.location-confirm strong {
+  font-size: 13px;
+}
+.location-confirm .mono {
+  display: block;
+  font-size: 11px;
+  margin-top: 4px;
+  color: var(--muted);
+}
+.notes-field {
+  margin-top: 24px;
+}
+.save-note {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  margin: 13px 0 0;
+}

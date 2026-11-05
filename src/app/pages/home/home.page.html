@@ -1,0 +1,154 @@
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)"
+    ><ion-refresher-content
+  /></ion-refresher>
+  <main class="page">
+    @let s = store.stats(); @let bike = store.settings();
+    <header class="page-top">
+      <div>
+        <p class="eyebrow">Gas Tracker / Overview</p>
+        <h1>{{ bike.name }}</h1>
+        <p class="subheading">Every fill. Every kilometer.</p>
+      </div>
+    </header>
+    <app-sync-banner />
+    <section class="instrument" aria-label="Motorcycle instrument panel">
+      <div class="telltales" aria-hidden="true">
+        <span [class.lit]="s.efficiency !== null && s.method === 'tank'">● FULL</span
+        ><span [class.lit]="s.efficiency !== null && s.method === 'gauge'">● EST</span
+        ><span [class.lit]="!store.online()">● OFFLINE</span
+        ><span [class.lit]="store.pending() > 0">● QUEUED</span>
+      </div>
+      <div class="lcd">
+        <div class="lcd-top">
+          <div class="dash-gauge">
+            <span>F</span
+            ><app-gauge
+              [level]="s.last?.gaugeLevel ?? null"
+              [max]="bike.gaugeSegments"
+              [vertical]="true"
+            /><span>E</span>
+          </div>
+          <div class="digits">
+            <span class="unit">km/L</span><app-segment-number [value]="s.efficiency" />
+          </div>
+          <dl class="instrument-readings">
+            <div>
+              <dt>LAST FILL</dt>
+              <dd>{{ s.last ? (s.last.dateTime | date: 'MMM d') : '—' }}</dd>
+            </div>
+            <div>
+              <dt>ODO / km</dt>
+              <dd>{{ s.lastOdometer !== null ? (s.lastOdometer | number: '1.0-1') : '—' }}</dd>
+            </div>
+            <div>
+              <dt>₱ / L</dt>
+              <dd>{{ s.pricePerLiter !== null ? (s.pricePerLiter | number: '1.2-2') : '—' }}</dd>
+            </div>
+          </dl>
+        </div>
+        <div class="scale" aria-hidden="true">
+          @for (tick of ticks; track tick) {
+            <i
+              [class.on]="s.efficiency !== null && tick <= s.efficiency"
+              [class.benchmark]="tick === 2 * Math.round(bike.factoryWMTC / 2)"
+            ></i>
+          }
+        </div>
+        <div class="scale-labels" aria-hidden="true">
+          <span>0</span><span>20</span><span>40</span><span>60</span><span>80</span>
+        </div>
+      </div>
+      <div class="instrument-footer">
+        <span>FUEL ECONOMY</span
+        ><span>{{
+          s.efficiency === null
+            ? 'AWAITING READINGS'
+            : s.method === 'tank'
+              ? 'TANK-TO-TANK · ROLLING 5'
+              : 'GAUGE ESTIMATE · ROLLING 5'
+        }}</span>
+      </div>
+    </section>
+    <div class="efficiency-note">
+      <span class="small muted">{{
+        s.efficiency === null
+          ? 'Add two usable readings to see your efficiency.'
+          : s.method === 'tank'
+            ? 'Measured between full tanks.'
+            : 'An approximation based on your fuel gauge.'
+      }}</span>
+      @if (s.efficiency !== null) {
+        <span class="badge accent"
+          >{{ s.efficiency - bike.factoryWMTC >= 0 ? '+' : ''
+          }}{{ s.efficiency - bike.factoryWMTC | number: '1.1-1' }} vs WMTC</span
+        >
+      }
+    </div>
+    <section class="stats-grid" aria-label="Fuel log summary">
+      <article class="card stat">
+        <div class="stat-label">
+          <span>Total spend</span><ion-icon name="cash-outline" aria-hidden="true" />
+        </div>
+        <strong>{{ s.totalSpend | currency: 'PHP' : 'symbol' : '1.2-2' }}</strong
+        ><span class="stat-foot">Across your fuel log</span>
+      </article>
+      <article class="card stat">
+        <div class="stat-label">
+          <span>Fill-ups</span><ion-icon name="receipt-outline" aria-hidden="true" />
+        </div>
+        <strong>{{ s.rows.length | number }}</strong
+        ><span class="stat-foot">Stops along the way</span>
+      </article>
+      <article class="card stat">
+        <div class="stat-label">
+          <span>Distance</span><ion-icon name="speedometer-outline" aria-hidden="true" />
+        </div>
+        <strong
+          >{{ s.totalDistance !== null ? (s.totalDistance | number: '1.0-1') : '—'
+          }}<small> km</small></strong
+        ><span class="stat-foot">Between odometer readings</span>
+      </article>
+      <article class="card stat">
+        <div class="stat-label">
+          <span>Cost / km</span><ion-icon name="water-outline" aria-hidden="true" />
+        </div>
+        <strong>{{
+          s.costPerKm !== null ? (s.costPerKm | currency: 'PHP' : 'symbol' : '1.2-2') : '—'
+        }}</strong
+        ><span class="stat-foot">Latest full-tank price estimate</span>
+      </article>
+    </section>
+    @if (!s.rows.length) {
+      <section class="card empty">
+        <ion-icon class="empty-icon" name="receipt-outline" aria-hidden="true" />
+        <h2>Your first fill starts here.</h2>
+        <p>
+          Record what you paid, your odometer, and the fuel gauge. Your ride’s story builds from
+          there.
+        </p>
+        <a class="button" routerLink="/fillup/new"
+          ><ion-icon name="add-outline" aria-hidden="true" />Log a fill-up</a
+        >
+      </section>
+    } @else {
+      <section class="card latest">
+        <div class="section-heading">
+          <h2>Last fill-up</h2>
+          <a class="text-button" routerLink="/log">View log <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="row between">
+          <div>
+            <strong>{{ s.last!.station || 'Station not recorded' }}</strong>
+            <p class="small muted">
+              {{ s.last!.dateTime | date: 'MMM d, y · h:mm a' }} · {{ s.last!.grade || 'No grade' }}
+            </p>
+          </div>
+          <strong class="mono">{{ s.last!.amount | currency: 'PHP' : 'symbol' : '1.2-2' }}</strong>
+        </div>
+        <app-gauge [level]="s.last!.gaugeLevel" [max]="bike.gaugeSegments" />
+      </section>
+    }
+    <p class="footer-note">Calibrated for segmented motorcycle fuel gauges</p>
+  </main>
+</ion-content>

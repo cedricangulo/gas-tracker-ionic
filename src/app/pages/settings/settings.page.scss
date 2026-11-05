@@ -1,0 +1,64 @@
+.settings-mark {
+  color: var(--muted);
+  font-size: 28px;
+}
+.appearance {
+  margin-bottom: 18px;
+}
+.appearance h2 {
+  font-size: 23px;
+}
+.appearance p {
+  margin-bottom: 17px;
+}
+.appearance .chips {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.bike-form {
+  display: grid;
+  gap: 23px;
+}
+.bike-form h2 {
+  margin-top: 7px;
+}
+.bike-form .section-heading {
+  margin-bottom: 0;
+  align-items: center;
+}
+.derived {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.derived p {
+  margin: 5px 0 0;
+  font-size: 11px;
+}
+.derived strong {
+  font-size: 26px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.derived small {
+  font:
+    13px 'Barlow',
+    sans-serif;
+}
+.compatibility {
+  margin-top: 20px;
+  display: flex;
+  align-items: start;
+  gap: 12px;
+}
+.compatibility ion-icon {
+  flex-shrink: 0;
+  font-size: 20px;
+}
+.compatibility p {
+  margin: 5px 0 0;
+}
