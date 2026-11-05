@@ -1,0 +1,4 @@
+Options -Indexes
+RewriteEngine On
+RewriteRule ^api/(fillups|settings)\.php$ - [L]
+RewriteRule ^ - [F,L]

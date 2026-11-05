@@ -1,0 +1,13 @@
+{
+  "name": "class-laboratories/gas-tracker-api",
+  "type": "project",
+  "require-dev": {
+    "phpstan/phpstan": "^2.1",
+    "phpunit/phpunit": "^11.5"
+  },
+  "require": {},
+  "scripts": {
+    "analyse": "phpstan analyse api seed.php --level=9 --no-progress",
+    "test": "phpunit --bootstrap api/helpers.php tests"
+  }
+}
