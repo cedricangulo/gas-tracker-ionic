@@ -76,10 +76,10 @@ Thumbs.db
 /playwright/.cache/
 
 # Local backend configuration and tooling
-php-backend/config.local.php
-php-backend/vendor/
-php-backend/.phpunit.cache/
-php-backend/.phpstan-cache/
+server/config.local.php
+server/vendor/
+server/.phpunit.cache/
+server/.phpstan-cache/
 artifacts/
 .scaffold-archive
 android/
@@ -87,5 +87,5 @@ ios/
 .env
 
 
-php-backend/.phpunit.result.cache
+server/.phpunit.result.cache
 

@@ -9,7 +9,7 @@ describe('LogPage', () => {
   it('shows the empty log prompt', () => {
     const fixture = TestBed.createComponent(LogPage);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('A clean slate.');
+    expect(fixture.nativeElement.textContent).toContain('No fill-ups yet');
   });
   it('renders entries newest first with an edit action', () => {
     const store = TestBed.inject(TrackerStore) as unknown as TestStore;

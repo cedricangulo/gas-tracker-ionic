@@ -7,14 +7,14 @@
           : store.rejected()
             ? 'A change needs attention'
             : store.pending()
-              ? store.pending() + ' pending change' + (store.pending() > 1 ? 's' : '')
-              : 'Working from this device'
+              ? store.pending() + ' change' + (store.pending() > 1 ? 's' : '') + ' to sync'
+              : 'Saved on this device'
       }}</strong>
       <span>{{
         store.rejected()?.error ||
           (!store.online()
-            ? 'Your log is saved here. Changes sync when you reconnect.'
-            : store.connectionError() || 'Saved locally. Synchronizing with PHP…')
+            ? 'Saved on this device. Will sync when connected.'
+            : store.connectionError() || 'Saved on this device. Syncing…')
       }}</span>
       @if (store.syncedAt()) {
         <small>Last synced {{ store.syncedAt() | date: 'MMM d, h:mm a' }}</small>

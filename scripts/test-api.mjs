@@ -7,9 +7,9 @@ import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 
-const php = process.env.PHP_BINARY || 'D:/xampp/php/php.exe';
+const php = process.env.PHP_BINARY || 'php';
 const database = 'gas_tracker_test_' + randomUUID().replaceAll('-', '');
-const root = resolve('php-backend');
+const root = resolve('server');
 let server;
 let count = 0;
 const results = [];
@@ -93,7 +93,7 @@ try {
     filledToFull: true,
     latitude: 14.5995,
     longitude: 120.9842,
-    notes: 'API fixture',
+
     createdAt: Date.now(),
   };
   await check('GET settings and initially empty fill-ups', async () => {
@@ -227,6 +227,27 @@ try {
     const saved = (await request('settings.php')).body.data;
     assert.equal(saved.name, 'Test bike');
     assert.ok(saved.stations.includes('Local pump'));
+    const custom = {
+      ...fill,
+      id: randomUUID(),
+      operationId: randomUUID(),
+      odometer: 1100,
+      dateTime: '2026-11-02T10:00:00+08:00',
+      station: 'Local pump',
+      grade: null,
+    };
+    assert.equal((await request('fillups.php', 'POST', custom)).status, 201);
+    const removeOldChoice = {
+      ...saved,
+      operationId: randomUUID(),
+      stations: saved.stations.filter((station) => station !== 'Uno'),
+    };
+    assert.equal((await request('settings.php', 'POST', removeOldChoice)).status, 200);
+    assert.ok(!(await request('settings.php')).body.data.stations.includes('Uno'));
+    const history = (await request('fillups.php')).body.data;
+    assert.equal(history.find((entry) => entry.id === id).station, 'Uno');
+    assert.equal(history.find((entry) => entry.id === custom.id).station, 'Local pump');
+    fill.customId = custom.id;
   });
   await check('Unknown IDs return 404 and unsupported methods return 405', async () => {
     assert.equal(
@@ -236,12 +257,120 @@ try {
     );
     assert.equal((await request('settings.php', 'PUT', {})).status, 405);
   });
-  await check('DELETE is replay-safe and removes the record', async () => {
+  await check('DELETE is replay-safe and archives the record', async () => {
     const op = { operationId: randomUUID() };
     assert.equal((await request('fillups.php?id=' + id, 'DELETE', op)).status, 200);
     assert.equal((await request('fillups.php?id=' + id, 'DELETE', op)).status, 200);
+    assert.equal(
+      (await request('fillups.php?id=' + fill.customId, 'DELETE', { operationId: randomUUID() }))
+        .status,
+      200,
+    );
     assert.deepEqual((await request('fillups.php')).body.data, []);
+    const archivedRows = Number(
+      runPhp(
+        configCode +
+          '$pdo->exec("USE ' +
+          database +
+          '"); echo $pdo->query("SELECT COUNT(*) FROM fillups WHERE archived_at IS NOT NULL")->fetchColumn();',
+      ),
+    );
+    assert.equal(archivedRows, 2);
   });
+  await check(
+    'Station rename keeps identity and active plus archived history, and retries its receipt',
+    async () => {
+      const active = {
+        ...fill,
+        id: randomUUID(),
+        operationId: randomUUID(),
+        station: 'Local pump',
+        odometer: 1200,
+        dateTime: '2026-11-03T10:00:00+08:00',
+      };
+      assert.equal((await request('fillups.php', 'POST', active)).status, 201);
+      const readRows = () =>
+        JSON.parse(
+          runPhp(
+            configCode +
+              '$pdo->exec("USE ' +
+              database +
+              "\"); echo json_encode($pdo->query(\"SELECT s.id,s.name,s.is_active,f.id AS fill_id,f.archived_at FROM station_choices s JOIN fillups f ON f.station_choice_id=s.id WHERE s.name='Local pump' OR s.name='Neighborhood pump'\")->fetchAll(PDO::FETCH_ASSOC));",
+          ),
+        );
+      const before = readRows();
+      const input = {
+        operationId: randomUUID(),
+        stationRename: { from: 'Local pump', to: ' Neighborhood pump ' },
+      };
+      const first = await request('settings.php', 'POST', input);
+      assert.equal(first.status, 200);
+      assert.ok(first.body.data.stations.includes('Neighborhood pump'));
+      assert.deepEqual(
+        await request('settings.php', 'POST', input).then((r) => r.body),
+        first.body,
+      );
+      const after = readRows();
+      assert.equal(after.length, 2);
+      assert.deepEqual(
+        after.map((row) => [row.id, row.is_active, row.fill_id, row.archived_at]),
+        before.map((row) => [row.id, row.is_active, row.fill_id, row.archived_at]),
+      );
+      assert.ok(after.every((row) => row.name === 'Neighborhood pump'));
+      assert.equal(
+        (await request('fillups.php')).body.data.find((row) => row.id === active.id).station,
+        'Neighborhood pump',
+      );
+    },
+  );
+  await check(
+    'Station rename rejects blanks, long names, missing stations and active or inactive duplicates',
+    async () => {
+      for (const to of ['', '   ', 'x'.repeat(81), 'shell', 'UNO']) {
+        const result = await request('settings.php', 'POST', {
+          operationId: randomUUID(),
+          stationRename: { from: 'Neighborhood pump', to },
+        });
+        assert.equal(result.status, 422);
+      }
+      assert.equal(
+        (
+          await request('settings.php', 'POST', {
+            operationId: randomUUID(),
+            stationRename: { from: 'Missing station', to: 'New name' },
+          })
+        ).status,
+        404,
+      );
+      assert.equal(
+        (await request('settings.php', 'POST', { operationId: randomUUID(), stationRename: null }))
+          .status,
+        422,
+      );
+    },
+  );
+  await check(
+    'Station rename permits case corrections and exact no-ops without reactivating archived choices',
+    async () => {
+      for (const [from, to] of [
+        ['Uno', 'UNO'],
+        ['UNO', 'UNO'],
+      ]) {
+        const result = await request('settings.php', 'POST', {
+          operationId: randomUUID(),
+          stationRename: { from, to },
+        });
+        assert.equal(result.status, 200);
+        assert.ok(!result.body.data.stations.includes(to));
+      }
+      const result = await request('settings.php', 'POST', {
+        operationId: randomUUID(),
+        stationRename: { from: 'Neighborhood pump', to: 'NEIGHBORHOOD PUMP' },
+      });
+      assert.equal(result.status, 200);
+      assert.ok(result.body.data.stations.includes('NEIGHBORHOOD PUMP'));
+    },
+  );
   mkdirSync('artifacts', { recursive: true });
   writeFileSync(
     'artifacts/api-results.json',

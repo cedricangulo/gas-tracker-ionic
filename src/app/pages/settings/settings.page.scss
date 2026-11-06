@@ -62,3 +62,62 @@
 .compatibility p {
   margin: 5px 0 0;
 }
+
+.stations {
+  margin-top: 18px;
+}
+.stations .section-heading {
+  align-items: center;
+  margin-bottom: 8px;
+}
+.stations .text-button {
+  min-height: 44px;
+}
+.stations h2 {
+  margin: 0;
+  font-size: 23px;
+}
+.stations > .form-error {
+  margin: 12px 0;
+}
+.station-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.station-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  border-top: 1px solid var(--line);
+}
+.station-list li:first-child {
+  border-top: 0;
+}
+.station-name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+.station-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 12px;
+}
+.station-actions .text-button {
+  min-height: 44px;
+  font-size: 13px;
+}
+@media (max-width: 360px) {
+  .station-list li {
+    align-items: start;
+    flex-direction: column;
+    gap: 0;
+    padding-top: 10px;
+  }
+  .station-actions {
+    align-self: flex-end;
+  }
+}

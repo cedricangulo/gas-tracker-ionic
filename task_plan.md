@@ -51,3 +51,13 @@ Removed date filtering; implemented grade-based station grouping, historical wei
 ### Mobile list loading and price charts - complete
 
 Implemented 10-at-a-time Load more for Log and Map Located fill-ups, per-session counts/scroll restoration, and grade-change resets without limiting calculations or heatmap points. Replaced the Gauge estimate chart with price-per-liter and cost-per-kilometer charts using the same closing-purchase price estimate as Home. Final verification: 47 component/helper/service tests + 37 unit tests passed, type-check and production build passed, independent review resolved. Browser testing skipped.
+
+### Database normalization (active)
+
+- [x] Inspect legacy schema/data and take a full SQL backup.
+- [x] Normalize settings and station/grade catalogs; replace fill-up names with foreign keys.
+- [x] Add resumable legacy migration and version 1 seed-backup restore support.
+- [x] Update API, seed tooling, tests, and setup documentation.
+- [x] Run PHP/API/type/build checks; migrate the live gas_tracker database and verify all existing records.
+
+Normalization complete: PHP 24/368, API 13 checks, PHPStan level 9, formatting, typecheck and production build passed. Live XAMPP records were preserved and read back through the unchanged API contract.

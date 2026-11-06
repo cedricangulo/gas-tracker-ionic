@@ -13,7 +13,7 @@ const base: Fillup = {
   longitude: 0,
   gaugeLevel: 3,
   filledToFull: false,
-  notes: '',
+
   createdAt: 1,
 };
 const fill = (id: string, changes: Partial<Fillup> = {}): Fillup => ({ ...base, id, ...changes });
@@ -110,17 +110,15 @@ describe('StationSummary', () => {
     expect(stations[3].latestPrice).toBeNull();
     expect(stations[3].pricedCount).toBe(0);
   });
-  it('does not rank zero/invalid liters and flags test data only within the selected grade', () => {
+  it('does not rank zero/invalid liters', () => {
     const groups = Summary.group([
       fill('a', { liters: 0 }),
       fill('b', { liters: NaN }),
-      fill('p', { grade: 'Premium', notes: 'Manual testing seed. Synthetic: station.' }),
+      fill('p', { grade: 'Premium' }),
     ]);
     const [unleaded] = Summary.compare(groups, 'unleaded');
     expect(unleaded.averagePrice).toBeNull();
     expect(unleaded.isLowest).toBe(false);
-    expect(unleaded.includesTestData).toBe(false);
-    expect(Summary.compare(groups, 'premium')[0].includesTestData).toBe(true);
   });
   it('handles empty datasets without a recommendation', () => {
     expect(Summary.group([])).toEqual([]);

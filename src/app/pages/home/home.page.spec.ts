@@ -6,7 +6,7 @@ describe('HomePage', () => {
   it('offers a first fill-up when the log is empty', () => {
     const fixture = TestBed.createComponent(HomePage);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('Your first fill starts here.');
+    expect(fixture.nativeElement.textContent).toContain('No fill-ups yet');
   });
   it('updates the latest fill when the shared log changes', () => {
     const store = TestBed.inject(TrackerStore) as unknown as TestStore;
@@ -16,6 +16,6 @@ describe('HomePage', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Uno');
     expect(fixture.nativeElement.textContent).toContain('Last fill-up');
-    expect(fixture.nativeElement.textContent).not.toContain('Your first fill starts here.');
+    expect(fixture.nativeElement.textContent).not.toContain('No fill-ups yet');
   });
 });

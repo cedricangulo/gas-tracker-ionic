@@ -80,12 +80,6 @@
   font-size: 11px;
   min-height: 44px;
 }
-.fill-notes {
-  font-size: 13px;
-  color: var(--muted);
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
 @media (max-width: 390px) {
   .fill-details {
     grid-template-columns: 1fr 1fr;

@@ -14,7 +14,7 @@ export const exampleFill: Fillup = {
   filledToFull: true,
   latitude: 14.5995,
   longitude: 120.9842,
-  notes: '',
+
   createdAt: 1,
 };
 export function createTestStore() {
@@ -39,6 +39,24 @@ export function createTestStore() {
     deleteFill: vi.fn(async (_id: string) => undefined),
     saveSettings: vi.fn(async (value: BikeSettings) => {
       settings.set(value);
+    }),
+    addStation: vi.fn(async (name: string) => {
+      settings.update((value) => ({ ...value, stations: [...value.stations, name] }));
+    }),
+    archiveStation: vi.fn(async (name: string) => {
+      settings.update((value) => ({
+        ...value,
+        stations: value.stations.filter((station) => station !== name),
+      }));
+    }),
+    renameStation: vi.fn(async (from: string, to: string, _operationId?: string) => {
+      settings.update((value) => ({
+        ...value,
+        stations: value.stations.map((station) => (station === from ? to : station)),
+      }));
+      fills.update((value) =>
+        value.map((fill) => (fill.station === from ? { ...fill, station: to } : fill)),
+      );
     }),
     setAppearance: vi.fn(async (value: 'auto' | 'day' | 'night') => {
       store.appearance.set(value);

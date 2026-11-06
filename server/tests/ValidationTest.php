@@ -34,7 +34,7 @@ final class ValidationTest extends TestCase
             'filledToFull' => true,
             'latitude' => 14.5995,
             'longitude' => 120.9842,
-            'notes' => '',
+
             'createdAt' => 1,
         ];
     }
@@ -85,9 +85,21 @@ final class ValidationTest extends TestCase
         $this->expectException(InputError::class);
         validate_settings($input);
     }
+    public function testCalibrationMustRemainValidAtDatabasePrecision(): void
+    {
+        $input = $this->settings();
+        $input['tankCapacity'] = 5.504;
+        $input['lowFuelAnchor'] = 5.502;
+        $this->expectException(InputError::class);
+        validate_settings($input);
+    }
     public function testCatalogNamesAreTrimmedAndDeduplicated(): void
     {
         self::assertSame(['Uno', 'Shell'], catalog([' Uno ', 'uno', 'Shell'], 'stations'));
+    }
+    public function testCatalogKeepsAccentDistinctNames(): void
+    {
+        self::assertSame(['Cafe', 'Café'], catalog(['Cafe', 'Café'], 'stations'));
     }
     public function testOdometerPlacementChecksBothNeighbors(): void
     {

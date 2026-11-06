@@ -5,19 +5,15 @@
   <main class="page">
     <header class="page-top">
       <div>
-        <p class="eyebrow">Gas Tracker / History</p>
         <h1>Fill-up log</h1>
-        <p class="subheading">
-          {{ store.fills().length }} fill-ups. A little more insight with every stop.
-        </p>
       </div>
     </header>
     <app-sync-banner />
     @if (!rows().length) {
       <section class="card empty">
         <ion-icon class="empty-icon" name="receipt-outline" aria-hidden="true" />
-        <h2>A clean slate.</h2>
-        <p>Your fill-ups will appear here, from the newest to the oldest.</p>
+        <h2>No fill-ups yet</h2>
+        <p>Add a fill-up to start your log.</p>
         <a class="button" routerLink="/fillup/new">Log your first fill-up</a>
       </section>
     }
@@ -68,9 +64,6 @@
               </dd>
             </div>
           </dl>
-          @if (fill.notes) {
-            <p class="fill-notes">{{ fill.notes }}</p>
-          }
           <div class="fill-bottom">
             <div class="fill-tags">
               <app-gauge [level]="fill.gaugeLevel" [max]="store.settings().gaugeSegments" />
@@ -78,11 +71,11 @@
                 <span class="badge accent">Full tank</span>
               }
               @if (store.isPending(fill.id)) {
-                <span class="badge pending">Pending sync</span>
+                <span class="badge pending">Waiting to sync</span>
               }
               @if (fill.latitude !== null) {
                 <span class="location-tag"
-                  ><ion-icon name="location-outline" aria-hidden="true" /> Located</span
+                  ><ion-icon name="location-outline" aria-hidden="true" /> Pinned</span
                 >
               }
             </div>

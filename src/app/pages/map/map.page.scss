@@ -1,9 +1,6 @@
 .map-page h1 {
   font-size: 32px;
 }
-.map-page .page-top .eyebrow {
-  font-size: 9px;
-}
 .map-page .page-top {
   align-items: flex-start;
 }
@@ -11,19 +8,31 @@
   white-space: nowrap;
 }
 .map-controls {
-  margin-bottom: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.map-controls .field {
+  min-width: 0;
+}
+.map-controls .field label {
+  margin-bottom: 6px;
 }
 .heat-toggle {
   gap: 8px;
-  margin: 16px 0 12px;
+  margin: 0;
   min-height: 44px;
 }
 .heat-legend {
   display: flex;
   align-items: center;
+  grid-column: 1 / -1;
   gap: 10px;
-  margin-top: 14px;
-  font-size: 11px;
+  margin: 0;
+  font-size: 12px;
   color: var(--muted);
 }
 .heat-legend i {
@@ -41,15 +50,21 @@
   background: var(--soft);
 }
 .map-canvas {
-  height: 400px;
+  height: clamp(320px, 55dvh, 480px);
   width: 100%;
   min-height: 300px;
 }
-.map-locate {
+.map-actions {
   position: absolute;
   z-index: 800;
   top: 12px;
   right: 12px;
+  display: grid;
+  gap: 8px;
+}
+.map-actions .icon-button {
+  width: 48px;
+  height: 48px;
   box-shadow: 0 2px 10px #0002;
 }
 .station-comparisons {
@@ -174,19 +189,6 @@
   }
 }
 
-.map-view-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-.map-view-toolbar strong {
-  margin-right: auto;
-  font:
-    600 24px 'Barlow Condensed',
-    sans-serif;
-}
 .expanded-map {
   position: fixed;
   inset: 0;
@@ -213,32 +215,17 @@
     env(safe-area-inset-left);
   box-sizing: border-box;
 }
-.is-expanded .map-view-toolbar {
-  flex-shrink: 0;
-  padding: 10px 16px;
-  margin: 0;
-  background: var(--surface, #fff);
-}
 .is-expanded .map-controls {
   position: absolute;
   z-index: 800;
-  top: calc(72px + env(safe-area-inset-top));
+  top: calc(12px + env(safe-area-inset-top));
   left: calc(12px + env(safe-area-inset-left));
-  right: calc(64px + env(safe-area-inset-right));
+  right: calc(76px + env(safe-area-inset-right));
   width: min(320px, calc(100% - 88px));
-  max-height: 35dvh;
+  max-height: 40dvh;
   overflow-y: auto;
   padding: 12px;
   box-shadow: 0 2px 10px #0002;
-}
-.is-expanded .heat-toggle {
-  margin: 8px 0;
-}
-.is-expanded .field-help {
-  margin: 0;
-}
-.is-expanded .heat-legend {
-  margin-top: 8px;
 }
 .is-expanded .map-frame {
   flex: 1;
@@ -256,4 +243,11 @@
   margin: 0;
   padding: 8px 16px;
   background: var(--surface, #fff);
+}
+
+@media (max-width: 390px) {
+  .is-expanded .map-controls {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
 }

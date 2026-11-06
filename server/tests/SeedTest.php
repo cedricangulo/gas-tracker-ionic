@@ -49,7 +49,7 @@ final class SeedTest extends TestCase
         }
     }
 
-    public function testFixturePreservesKnownReadingsAndMarksSyntheticValues(): void
+    public function testFixturePreservesKnownReadings(): void
     {
         $fills = seed_validated_rows(get_settings($this->pdo));
         self::assertCount(42, $fills);
@@ -61,10 +61,7 @@ final class SeedTest extends TestCase
         self::assertSame(4244.0, $fills[41]['odometer']);
         self::assertSame('2026-11-05T14:11:00+08:00', $fills[41]['dateTime']);
         foreach ($fills as $i => $fill) {
-            self::assertStringContainsString(
-                'Synthetic: station, coordinates, grade',
-                $fill['notes'],
-            );
+            self::assertArrayNotHasKey('notes', $fill);
             self::assertGreaterThan(0, $fill['liters']);
             self::assertContains($fill['station'], ['Uno Fuel', 'CLEANTECH', 'Petron']);
             self::assertNotNull($fill['latitude']);
@@ -76,7 +73,7 @@ final class SeedTest extends TestCase
         }
     }
 
-    public function testApplyIsRepeatableAndRestoreRecoversAllThreeTables(): void
+    public function testApplyIsRepeatableAndRestoreRecoversAllTables(): void
     {
         $this->pdo->exec(
             "INSERT INTO mutation_receipts (operation_id,fingerprint,status,payload) VALUES ('b7724ad8-13a5-4396-8423-ddbf4ba130ad',REPEAT('a',64),200,'{}')",
@@ -87,6 +84,8 @@ final class SeedTest extends TestCase
         $seeded = seed_snapshot($this->pdo);
         self::assertCount(42, $seeded['fillups']);
         self::assertSame([], $seeded['mutation_receipts']);
+        self::assertCount(7, $seeded['station_choices']);
+        self::assertCount(2, $seeded['grade_choices']);
         self::assertContains('CLEANTECH', get_settings($this->pdo)['stations']);
         self::assertContains('Shell', get_settings($this->pdo)['stations']);
         seed_apply($this->pdo, $this->backupDirectory);

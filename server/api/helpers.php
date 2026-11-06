@@ -89,7 +89,10 @@ function cors(): void
         !in_array($origin, $allowed, true) &&
         in_array(server_value('REQUEST_METHOD'), ['POST', 'PUT', 'DELETE'], true)
     ) {
-        respond(403, ['success' => false, 'message' => 'Origin is not allowed.']);
+        respond(403, [
+            'success' => false,
+            'message' => 'This app cannot connect from this address.',
+        ]);
     }
     header('Content-Type: application/json; charset=utf-8');
     header('Cache-Control: no-store');
@@ -106,19 +109,19 @@ function body(): array
 {
     $contentType = strtolower(trim(explode(';', server_value('CONTENT_TYPE'))[0]));
     if ($contentType !== 'application/json') {
-        throw new InputError(415, 'Content-Type must be application/json.');
+        throw new InputError(415, 'The save request could not be read. Please try again.');
     }
     $raw = file_get_contents('php://input');
     if ($raw === false || trim($raw) === '') {
-        throw new InputError(400, 'Request body is required.');
+        throw new InputError(400, 'No changes were received. Please try again.');
     }
     try {
         $data = json_decode($raw, true, 32, JSON_THROW_ON_ERROR);
     } catch (JsonException) {
-        throw new InputError(400, 'Invalid JSON request body.');
+        throw new InputError(400, 'The save request could not be read. Please try again.');
     }
     if (!is_array($data) || array_is_list($data)) {
-        throw new InputError(400, 'A JSON object is required.');
+        throw new InputError(400, 'The save request could not be read. Please try again.');
     }
     return object_array($data);
 }
@@ -132,7 +135,7 @@ function uuid(mixed $value, string $field = 'id'): string
             $value,
         )
     ) {
-        throw new InputError(400, 'A valid UUID is required for ' . $field . '.');
+        throw new InputError(400, 'This record could not be identified. Refresh and try again.');
     }
     return strtolower($value);
 }
@@ -151,7 +154,22 @@ function number(array $data, string $key, float $min, float $max, bool $optional
         $value > $max
     ) {
         throw new InputError(422, 'Validation failed.', [
-            $key => $key . ' must be between ' . $min . ' and ' . $max . '.',
+            $key =>
+                match ($key) {
+                    'tankCapacity' => 'Tank capacity',
+                    'lowFuelAnchor' => 'Fuel remaining at E',
+                    'gaugeSegments' => 'Fuel gauge bars',
+                    'factoryWMTC' => 'Factory fuel economy',
+                    'gaugeLevel' => 'Fuel gauge reading',
+                    'createdAt' => 'Recorded time',
+                    'latitude', 'longitude' => 'Location',
+                    default => ucfirst($key),
+                } .
+                ' must be between ' .
+                $min .
+                ' and ' .
+                $max .
+                '.',
         ]);
     }
     return (float) $value;
@@ -183,7 +201,14 @@ function catalog(mixed $value, string $key): array
         $name = text($item, $key, 80);
         if (
             $name !== null &&
-            !in_array(strtolower($name), array_map('strtolower', $result), true)
+            !in_array(
+                mb_strtolower($name, 'UTF-8'),
+                array_map(
+                    static fn(string $item): string => mb_strtolower($item, 'UTF-8'),
+                    $result,
+                ),
+                true,
+            )
         ) {
             $result[] = $name;
         }
@@ -202,7 +227,7 @@ function validate_settings(array $data): array
     }
     $anchor = number($data, 'lowFuelAnchor', 0, 999);
     if ($anchor === null) {
-        throw new RuntimeException('Low-fuel anchor is required.');
+        throw new RuntimeException('Fuel remaining at E is required.');
     }
     $bars = number($data, 'gaugeSegments', 1, 20);
     if ($bars === null) {
@@ -210,12 +235,18 @@ function validate_settings(array $data): array
     }
     if ($bars !== floor($bars)) {
         throw new InputError(422, 'Validation failed.', [
-            'gaugeSegments' => 'Gauge segments must be a whole number.',
+            'gaugeSegments' => 'Fuel gauge bars must be a whole number.',
         ]);
     }
     if ($anchor >= $tank) {
         throw new InputError(422, 'Validation failed.', [
-            'lowFuelAnchor' => 'Low-fuel anchor must be smaller than tank capacity.',
+            'lowFuelAnchor' => 'Fuel remaining at E must be smaller than tank capacity.',
+        ]);
+    }
+    if (round($anchor, 3) >= round($tank, 2)) {
+        throw new InputError(422, 'Validation failed.', [
+            'lowFuelAnchor' =>
+                'Fuel remaining at E must be smaller than tank capacity after rounding.',
         ]);
     }
     $name = text($data['name'] ?? null, 'bike name', 100);
@@ -237,20 +268,122 @@ function validate_settings(array $data): array
 /** @return array{name: string, tankCapacity: float, gaugeSegments: int, lowFuelAnchor: float, factoryWMTC: float, stations: list<string>, grades: list<string>} */
 function get_settings(PDO $pdo): array
 {
-    $payload = query_statement($pdo, 'SELECT payload FROM settings WHERE id = 1')->fetchColumn();
-    if (!is_string($payload)) {
+    $row = query_statement(
+        $pdo,
+        'SELECT name, tank_capacity, gauge_segments, low_fuel_anchor, factory_wmtc FROM settings WHERE id = 1',
+    )->fetch();
+    if (!is_array($row)) {
         throw new RuntimeException('Import sql/setup.sql first.');
     }
-    $settings = json_decode($payload, true, 32, JSON_THROW_ON_ERROR);
-    if (!is_array($settings)) {
-        throw new RuntimeException('Invalid saved settings.');
+    $catalog = static function (PDO $pdo, string $table): array {
+        if (!in_array($table, ['station_choices', 'grade_choices'], true)) {
+            throw new RuntimeException('Invalid choice catalog.');
+        }
+        $result = [];
+        foreach (
+            query_statement(
+                $pdo,
+                'SELECT name FROM ' . $table . ' WHERE is_active = 1 ORDER BY sort_order, id',
+            )->fetchAll()
+            as $choice
+        ) {
+            $result[] = db_string($choice['name']);
+        }
+        return $result;
+    };
+    return validate_settings([
+        'name' => db_string($row['name']),
+        'tankCapacity' => db_number($row['tank_capacity']),
+        'gaugeSegments' => (int) db_number($row['gauge_segments']),
+        'lowFuelAnchor' => db_number($row['low_fuel_anchor']),
+        'factoryWMTC' => db_number($row['factory_wmtc']),
+        'stations' => $catalog($pdo, 'station_choices'),
+        'grades' => $catalog($pdo, 'grade_choices'),
+    ]);
+}
+
+/** Rename one station without replacing its identity, activation or historical references. */
+function rename_station(PDO $pdo, mixed $rename): void
+{
+    if (!is_array($rename) || array_is_list($rename)) {
+        throw new InputError(422, 'Choose a station and enter its new name.');
     }
-    return validate_settings(object_array($settings));
+    $fromValue = $rename['from'] ?? null;
+    $toValue = $rename['to'] ?? null;
+    if (!is_string($fromValue) || !is_string($toValue)) {
+        throw new InputError(422, 'Enter a station name.');
+    }
+    $from = trim($fromValue);
+    $to = trim($toValue);
+    if ($from === '' || $to === '') {
+        throw new InputError(422, 'Enter a station name.');
+    }
+    if (strlen($from) > 80 || strlen($to) > 80) {
+        throw new InputError(422, 'Enter a shorter station name.');
+    }
+    $find = $pdo->prepare('SELECT id FROM station_choices WHERE name = ?');
+    $find->execute([$from]);
+    $id = $find->fetchColumn();
+    if ($id === false) {
+        throw new InputError(404, 'Station not found.');
+    }
+    if ($from === $to) {
+        return;
+    }
+    $duplicate = $pdo->prepare(
+        'SELECT id FROM station_choices WHERE LOWER(name) = LOWER(?) AND id <> ? LIMIT 1',
+    );
+    $duplicate->execute([$to, $id]);
+    if ($duplicate->fetchColumn() !== false) {
+        throw new InputError(422, 'A station with that name already exists.');
+    }
+    $update = $pdo->prepare('UPDATE station_choices SET name = ? WHERE id = ?');
+    $update->execute([$to, $id]);
+}
+
+/** Persist selectable names while retaining retired values referenced by past fill-ups.
+ *  @param list<string> $names
+ */
+function save_choice_catalog(PDO $pdo, string $table, array $names): void
+{
+    if (!in_array($table, ['station_choices', 'grade_choices'], true)) {
+        throw new RuntimeException('Invalid choice catalog.');
+    }
+    query_statement($pdo, 'UPDATE ' . $table . ' SET is_active = 0')->execute();
+    $stmt = $pdo->prepare(
+        'INSERT INTO ' .
+            $table .
+            ' (name, is_active, sort_order) VALUES (?, 1, ?) ON DUPLICATE KEY UPDATE is_active = 1, sort_order = VALUES(sort_order)',
+    );
+    foreach ($names as $index => $name) {
+        $stmt->execute([$name, $index]);
+    }
+}
+
+/** Resolve a display name to its normalized choice row, retaining its spelling.
+ *  @param 'station_choices'|'grade_choices' $table
+ */
+function choice_id(PDO $pdo, string $table, ?string $name): ?int
+{
+    if ($name === null) {
+        return null;
+    }
+    $stmt = $pdo->prepare('SELECT id FROM ' . $table . ' WHERE name = ?');
+    $stmt->execute([$name]);
+    $id = $stmt->fetchColumn();
+    if ($id !== false) {
+        return (int) $id;
+    }
+    $insert = $pdo->prepare(
+        'INSERT INTO ' . $table . ' (name, is_active, sort_order) VALUES (?, 0, 65535)',
+    );
+    $insert->execute([$name]);
+    return (int) $pdo->lastInsertId();
 }
 
 /** @param array<string, mixed> $data
  *  @param array<string, mixed> $settings
- *  @return array<string, mixed>
+ *  @return array{id: string, amount: float, liters: float|null, odometer: float|null, dateTime: string, station: string|null, grade: string|null, gaugeLevel: int|null, filledToFull: bool, latitude: float|null, longitude: float|null, createdAt: int}
  */
 function validate_fill(array $data, array $settings): array
 {
@@ -260,7 +393,7 @@ function validate_fill(array $data, array $settings): array
         !preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})$/D', $date)
     ) {
         throw new InputError(422, 'Validation failed.', [
-            'dateTime' => 'Provide an ISO date-time with a timezone offset.',
+            'dateTime' => 'Enter a valid date and time.',
         ]);
     }
     try {
@@ -278,16 +411,12 @@ function validate_fill(array $data, array $settings): array
         throw new InputError(422, 'Gauge reading must be a whole number.');
     }
     if (!isset($data['filledToFull']) || !is_bool($data['filledToFull'])) {
-        throw new InputError(422, 'Filled to full must be true or false.');
+        throw new InputError(422, 'Choose whether the tank was filled to full.');
     }
     $lat = number($data, 'latitude', -90, 90, true);
     $lng = number($data, 'longitude', -180, 180, true);
     if (($lat === null) !== ($lng === null)) {
         throw new InputError(422, 'Both coordinates are required together.');
-    }
-    $notes = $data['notes'] ?? '';
-    if (!is_string($notes) || strlen($notes) > 2000) {
-        throw new InputError(422, 'Notes must be at most 2000 bytes.');
     }
     return [
         'id' => uuid($data['id'] ?? null),
@@ -301,7 +430,7 @@ function validate_fill(array $data, array $settings): array
         'filledToFull' => $data['filledToFull'],
         'latitude' => $lat,
         'longitude' => $lng,
-        'notes' => trim($notes),
+
         'createdAt' => (int) (number($data, 'createdAt', 1, 9007199254740991) ?? 0),
     ];
 }
@@ -324,7 +453,7 @@ function fill_dto(array $row): array
         'filledToFull' => db_number($row['filled_to_full']) === 1.0,
         'latitude' => $floatOrNull($row['latitude']),
         'longitude' => $floatOrNull($row['longitude']),
-        'notes' => db_string($row['notes']),
+
         'createdAt' => (int) db_number($row['created_at']),
     ];
 }
@@ -333,7 +462,9 @@ function fill_dto(array $row): array
 function get_fills(PDO $pdo): array
 {
     $result = [];
-    foreach (query_statement($pdo, 'SELECT * FROM fillups')->fetchAll() as $row) {
+    $sql =
+        'SELECT f.id, f.amount, f.liters, f.odometer, f.date_time, s.name AS station, g.name AS grade, f.gauge_level, f.filled_to_full, f.latitude, f.longitude, f.created_at FROM fillups f LEFT JOIN station_choices s ON s.id = f.station_choice_id LEFT JOIN grade_choices g ON g.id = f.grade_choice_id WHERE f.archived_at IS NULL';
+    foreach (query_statement($pdo, $sql)->fetchAll() as $row) {
         $result[] = fill_dto(object_array($row));
     }
     return $result;
@@ -394,7 +525,7 @@ function begin_mutation(PDO $pdo, array $input): string
             $pdo->rollBack();
             throw new InputError(
                 409,
-                'This operation ID was already used for a different request.',
+                'This change conflicts with an earlier save. Refresh and try again.',
             );
         }
         $pdo->commit();
@@ -447,7 +578,6 @@ function api_error(Throwable $error, ?PDO $pdo): never
     error_log('Gas Tracker API: ' . $error->getMessage());
     respond(500, [
         'success' => false,
-        'message' =>
-            'Database or server error. Start MySQL, import setup.sql, and check PHP configuration and logs.',
+        'message' => 'Could not save or load your tracker. Please try again shortly.',
     ]);
 }

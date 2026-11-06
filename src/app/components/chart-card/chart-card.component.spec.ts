@@ -11,7 +11,7 @@ describe('ChartCardComponent', () => {
   it('provides exact values as accessible table data', () => {
     const fixture = TestBed.createComponent(ChartCardComponent);
     fixture.componentRef.setInput('title', 'Monthly spend');
-    fixture.componentRef.setInput('unit', 'PHP');
+    fixture.componentRef.setInput('unit', '\u20b1');
     fixture.componentRef.setInput('labels', ['Nov 26']);
     fixture.componentRef.setInput('values', [200]);
     fixture.detectChanges();
@@ -23,7 +23,7 @@ describe('ChartCardComponent', () => {
   it('explains an empty chart without claiming a zero measurement', () => {
     const fixture = TestBed.createComponent(ChartCardComponent);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('More readings, more perspective.');
+    expect(fixture.nativeElement.textContent).toContain('No chart data yet');
     expect(fixture.nativeElement.querySelector('table')).toBeNull();
   });
 });

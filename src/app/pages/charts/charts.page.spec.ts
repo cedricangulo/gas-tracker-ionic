@@ -19,7 +19,9 @@ describe('ChartsPage', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Gauge estimate');
     expect(fixture.nativeElement.textContent).toContain('Price per liter');
     expect(fixture.nativeElement.textContent).toContain('Cost per kilometer');
-    expect(fixture.nativeElement.textContent).toContain('Gauge-based estimate');
+    expect(fixture.nativeElement.textContent).toContain(
+      'Estimated from gauge readings and fuel prices.',
+    );
     expect(fixture.nativeElement.textContent).toContain('Monthly spend');
   });
   it('uses shared monthly spending data', () => {

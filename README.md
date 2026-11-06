@@ -6,21 +6,22 @@ The app includes Home, Charts, Log, Settings, create/edit fill-ups, and a Leafle
 
 ## Open this project
 
-The repository is now at:
+Example project location:
 
 ```text
-D:\xampp\htdocs\gas-tracker-mobile
+<web-root>/gas-tracker-mobile
 ```
 
-Reopen that folder in your editor/Codex. Windows held the previous workspace directory open, so the repository contents were moved and the previous directory was left empty.
+Open your project folder in your editor. The server directory is part of this repository.
 
 ## Run with XAMPP
 
 1. Start **Apache** and **MySQL** in the XAMPP Control Panel.
 2. Open phpMyAdmin at `http://localhost/phpmyadmin/`.
-3. Import `php-backend/sql/setup.sql`. It creates the `gas_tracker` database and its tables. Re-importing does not erase existing records.
-4. Optionally copy `php-backend/config.example.php` to `php-backend/config.local.php` and set your local connection values. A standard fresh XAMPP installation uses host `127.0.0.1`, port `3306`, user `root`, and an empty password. The local configuration is ignored by Git.
-5. Check the API at `http://localhost/gas-tracker-mobile/php-backend/api/settings.php`.
+3. For a fresh database, import `server/sql/setup.sql`. It creates the normalized `gas_tracker` schema and default choices. Re-importing does not erase existing records.
+4. For an existing pre-normalization database, first export a full SQL backup in phpMyAdmin or with `mysqldump`. Close the app or stop sync while migrating, then run `php server/migrate.php` from the repository root. The CLI migration also writes a row-level restore backup under ignored `artifacts/` before altering tables. It can be rerun after a partial DDL failure.
+5. Optionally copy `server/config.example.php` to `server/config.local.php` and set your local connection values. A standard fresh XAMPP installation uses host `127.0.0.1`, port `3306`, user `root`, and an empty password. The local configuration is ignored by Git.
+6. Check the API at `http://localhost/gas-tracker-mobile/server/api/settings.php`.
 
 The PHP runtime needs PDO MySQL; XAMPP's bundled PHP 8.2 works. Composer is **only needed for backend development checks**, not to run the API.
 
@@ -55,7 +56,7 @@ Set `apiBaseUrl` in the generated environment files:
 - `src/environments/environment.prod.ts`: production build.
 - `src/environments/environment.ts`: base environment.
 
-Default: `http://localhost/gas-tracker-mobile/php-backend/api`.
+Default: `http://localhost/gas-tracker-mobile/server/api`.
 
 If the frontend origin changes, add its exact origin to `allowed_origins` in the PHP configuration. The API requires `application/json` for mutations and rejects browser mutations from untrusted origins.
 
@@ -64,7 +65,7 @@ If the frontend origin changes, add its exact origin to `allowed_origins` in the
 | GET    | `fillups.php`           | Read the fill-up log                         |
 | POST   | `fillups.php`           | Create a fill-up                             |
 | PUT    | `fillups.php?id=<uuid>` | Update a fill-up                             |
-| DELETE | `fillups.php?id=<uuid>` | Delete a fill-up                             |
+| DELETE | `fillups.php?id=<uuid>` | Archive a fill-up                            |
 | GET    | `settings.php`          | Read bike settings and station/grade choices |
 | POST   | `settings.php`          | Save bike settings and choices               |
 
@@ -72,18 +73,22 @@ Responses use the lecture-style `{ success, data?, message?, errors? }` envelope
 
 This is a local, single-dataset application without authentication. Public hosting and multi-account access are outside this delivery.
 
+## Database structure
+
+The database stores bike configuration as scalar settings columns. Selectable station and grade names live in separate choice tables; fill-ups refer to those rows with nullable foreign keys. The API still returns and accepts station/grade names. Removed choices become inactive so existing fill-up history keeps its labels and valid references. Deleting a fill-up sets its `archived_at` timestamp; archived rows are hidden from normal API reads and retained in the database.
+
 ## Fuel calculations
 
 Defaults: Honda Click 125i V4, 5.5 L tank, six bars above E, 1.2 L low-fuel anchor, 50 km/L WMTC.
 
-- Liters per bar = `(tank capacity − low-fuel anchor) / gauge segments`.
+- Liters per bar = `(tank capacity âˆ’ low-fuel anchor) / gauge segments`.
 - Gauge readings describe fuel **after** filling. E is the configured low-fuel anchor, not an empty tank.
 - Tank-to-tank efficiency uses distance between full fills divided by purchases after the opening fill, including partial fills and the closing fill.
 - Home prefers a rolling average of the latest five measurable tank intervals; otherwise it shows a labeled gauge estimate.
 - Gauge intervals carry the same distance/fuel anchor across missing gauge readings. Missing fuel measurements do not become zero fuel.
 - Home's price per liter is weighted by purchases with recorded liters. Its cost/km preserves the reference's **price estimate**: closing fill price/L divided by that tank interval's km/L. It is labeled as an estimate, not actual interval spending/km.
 - Monthly odometer distance belongs to the later reading's recorded month. Where only liters and an efficiency reading exist, estimated monthly distance is labeled.
-- Amount and date/time are required; liters, odometer, gauge, station, grade, notes, and location are optional. Missing measurements display as unavailable.
+- Amount and date/time are required; liters, odometer, gauge, station, grade, and location are optional. Missing measurements display as unavailable.
 - Odometer readings must increase in chronological order, including backdated entries and edits. Date-times retain a timezone offset.
 
 ## Offline use and location
@@ -110,13 +115,13 @@ pnpm test:php
 - `pnpm test:php`: real HTTP/PHP/MySQL integration against a disposable randomly named database. It never changes `gas_tracker`.
 - `pnpm test`: both frontend unit suites.
 
-For API integration tests, start MySQL. The script defaults to `D:/xampp/php/php.exe`; set `PHP_BINARY` for another installation.
+For API integration tests, start MySQL. The script defaults to `php`; set `PHP_BINARY` for another installation.
 
-Optional strict PHP checks after `composer install` inside `php-backend`:
+Optional strict PHP checks after `composer install` inside `server`:
 
 ```powershell
-D:\xampp\php\php.exe vendor\phpstan\phpstan\phpstan analyse api --level=9 --no-progress
-D:\xampp\php\php.exe vendor\bin\phpunit --bootstrap api/helpers.php tests
+php vendor\phpstan\phpstan\phpstan analyse api --level=9 --no-progress
+php vendor\bin\phpunit --bootstrap api/helpers.php tests
 ```
 
 If Composer needs ZIP support, enable the installed extension just for that command: `php -d extension=zip <path-to-composer.phar> install`.
@@ -143,7 +148,7 @@ Add coarse/fine location permissions to AndroidManifest.xml. A phone's `localhos
 
 For iOS later, install `@capacitor/ios@7`, add the platform on macOS, set location usage descriptions in Info.plist, and sync/open using Capacitor.
 
-The course's installable APK, 3–5 page report, and 8–12 minute recording remain separate submission steps. Suggested code snippets to explain: Angular HttpClient in `services/api.ts`, geolocation in `services/geo.ts`, and atomic offline mutations in `services/tracker-store.ts`.
+The course's installable APK, 3â€“5 page report, and 8â€“12 minute recording remain separate submission steps. Suggested code snippets to explain: Angular HttpClient in `services/api.ts`, geolocation in `services/geo.ts`, and atomic offline mutations in `services/tracker-store.ts`.
 
 ## Vehicle Compatibility Notice
 
@@ -163,30 +168,32 @@ Users of other vehicles should treat the gauge-related features as approximate o
 - [Lecture PHP API](https://github.com/gelcunanan/http-backend).
 - [Ionic documentation](https://ionicframework.com/docs).
 - [Capacitor Geolocation](https://capacitorjs.com/docs/v7/apis/geolocation).
-- Map tiles: OpenStreetMap, with attribution in the map.
+- Map tiles: OpenStreetMap Standard (Mapnik), with OpenStreetMap attribution.
 
 Codex assisted with implementation, tests, documentation, and code review. The group should review the code and demonstrate the actual device/browser flow before recording its submission.
 
 ## Manual testing seed
 
-The CLI-only `php-backend/seed.php` embeds 42 fixed fill-ups (June 18-November 5, 2026), totaling **PHP 6,548.16**. It does not read `stations.txt` or any Desktop CSV at runtime. Those reference files are marked read-only. Recorded input values are preserved; synthetic station assignments, coordinates, grades, missing times, liters, and odometers are identified in each record's notes. Calculations now include the synthetic readings and should be treated as test results.
+The CLI-only `server/seed.php` embeds 42 fixed fill-ups (June 18-November 5, 2026), totaling **PHP 6,548.16**. It does not read `stations.txt` or external CSV files at runtime. Those reference files are marked read-only. Recorded input values are preserved; station assignments, coordinates, grades, missing times, liters, and odometers include synthetic test values. Per-record notes and test-data badges have been removed. Calculations now include the synthetic readings and should be treated as test results.
 
 From the repository root:
 
 ```powershell
 # Preview all records without changing the database
-D:\xampp\php\php.exe php-backend/seed.php
+php server/seed.php
 # Finish pending app synchronization and close app tabs first
-D:\xampp\php\php.exe php-backend/seed.php --apply
+php server/seed.php --apply
 # Restore a backup (also creates a backup of the state being replaced)
-D:\xampp\php\php.exe php-backend/seed.php --restore artifacts/seed-backup-TIMESTAMP-ID.json
+php server/seed.php --restore artifacts/seed-backup-TIMESTAMP-ID.json
 ```
 
-Apply replaces all fill-ups and clears old mutation receipts in one transaction. It merges seed station/grade choices and preserves other bike settings. A complete JSON backup of all three tables is written to ignored `artifacts/` before changes; failures roll back. Repeated apply runs produce the same fixed IDs and values. Restore accepts only backups matching the current database name. Reopen or refresh the app afterward; unsynced offline edits can otherwise reappear.
+Apply replaces all fill-ups and clears old mutation receipts in one transaction. It merges seed station/grade choices and preserves other bike settings. A complete JSON backup of all five tables is written to ignored `artifacts/` before changes; failures roll back. Repeated apply runs produce the same fixed IDs and values. Restore accepts only backups matching the current database name. Reopen or refresh the app afterward; unsynced offline edits can otherwise reappear.
 
-The seed tests create and drop uniquely named `gas_tracker_seed_test_*` databases using the configured local MySQL account. Run them with `D:\xampp\php\php.exe php-backend/vendor/bin/phpunit --bootstrap php-backend/api/helpers.php php-backend/tests`. Include `php-backend/seed.php` alongside `php-backend/api` when running PHPStan level 9. Browser testing is intentionally skipped.
+The seed tests create and drop uniquely named `gas_tracker_seed_test_*` databases using the configured local MySQL account. Run them with `php server/vendor/bin/phpunit --bootstrap server/api/helpers.php server/tests`. Include `server/seed.php` alongside `server/api` when running PHPStan level 9. Browser testing is intentionally skipped.
 
 ## Map station comparisons
+
+The map uses OpenStreetMap Standard (Mapnik) for detailed roads, place names, and landmarks around fuel stops. Map tiles require internet and follow the [OpenStreetMap tile usage policy](https://operations.osmfoundation.org/policies/tiles/).
 
 Map is available in the bottom tabs and uses all recorded dates. Select a fuel grade to compare like-for-like prices; Unleaded is selected when available, otherwise the earliest recorded named grade. Ungraded records have a separate Not recorded option and no lowest-price recommendation.
 
@@ -203,3 +210,15 @@ The Map page has an **Expand map** button. Its fullscreen dialog reuses the curr
 ## Code formatting
 
 Run `pnpm format` to format supported source and documentation files, and `pnpm format:check` to verify formatting. Prettier uses the PHP plugin targeting XAMPP PHP 8.2. Generated output, dependencies, lockfiles and the read-only `stations.txt` source are excluded. VS Code uses the recommended Prettier extension for format on save.
+
+### Server rename and notes removal
+
+The PHP backend now lives in `server/`; the API remains PHP endpoints at `/gas-tracker-mobile/server/api`. Update deployed frontend configuration and restart the development server after this change. Finish pending synchronization and close old app tabs before switching paths: mutation receipts fingerprint request URLs and bodies, so this is a maintenance cutover rather than an old-client compatibility layer.
+
+Run `php server/migrate.php` against an existing database. Before removing retired notes from the fill-up column or saved response payloads it writes a complete raw version 2 backup under ignored `artifacts/`. Existing fill-ups, archived timestamps, settings, choices, and mutation receipts remain in place; do not run the seed apply command to upgrade. New seed backups use version 3 without notes. Restore accepts versions 1, 2 and 3, discards retired note text from old backups, and preserves archived timestamps. Local snapshots retain records/settings and queued drafts while removing legacy note fields. Notes and test-data badges are no longer part of the app.
+
+## Manage stations
+
+Settings has a Stations list with Add, Rename, and Archive. Renaming requires a connection and completed pending saves; it corrects the same station in past fill-ups and on the map. If a rename cannot be confirmed, retry the same name or refresh stations before making another station change. Archiving hides a station from new-entry choices and keeps historical fill-ups. Fuel grades remain customizable through the fill-up form.
+
+Station rename uses `POST settings.php` with `{ operationId, stationRename: { from, to } }`. It preserves the station row ID and uses the existing retry receipts. No database migration is required.

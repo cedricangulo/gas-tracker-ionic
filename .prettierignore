@@ -7,4 +7,4 @@ ios/
 # Preserve source material and generated lockfiles.
 stations.txt
 pnpm-lock.yaml
-php-backend/composer.lock
+server/composer.lock

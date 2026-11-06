@@ -21,7 +21,7 @@ export interface Fillup {
   filledToFull: boolean;
   latitude: number | null;
   longitude: number | null;
-  notes: string;
+
   createdAt: number;
 }
 export interface ApiResponse<T> {
@@ -40,6 +40,7 @@ export interface QueuedMutation {
 }
 export interface Snapshot {
   version: 1;
+  stationRename?: { from: string; to: string; operationId: string };
   fills: Fillup[];
   settings: BikeSettings;
   appearance: Appearance;

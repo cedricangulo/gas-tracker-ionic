@@ -30,6 +30,52 @@ describe('FillupFormPage', () => {
     component.selectStation('Uno');
     expect(component.form.dirty).toBe(true);
   });
+  it('lights bars through the selected reading and clears them for E or a repeated tap', () => {
+    const fixture = TestBed.createComponent(FillupFormPage);
+    fixture.detectChanges();
+    const buttons = () =>
+      Array.from(
+        fixture.nativeElement.querySelectorAll('.gauge-selector button'),
+      ) as HTMLButtonElement[];
+    const lit = () =>
+      buttons()
+        .filter((button) => button.classList.contains('lit'))
+        .map((button) => button.textContent?.trim());
+    buttons()[6].click();
+    fixture.detectChanges();
+    expect(lit()).toEqual(['1', '2', '3', '4', '5', '6']);
+    expect(buttons().filter((button) => button.getAttribute('aria-pressed') === 'true')).toEqual([
+      buttons()[6],
+    ]);
+    expect(fixture.componentInstance.form.dirty).toBe(true);
+    buttons()[3].click();
+    fixture.detectChanges();
+    expect(lit()).toEqual(['1', '2', '3']);
+    buttons()[0].click();
+    fixture.detectChanges();
+    expect(lit()).toEqual([]);
+    expect(fixture.componentInstance.form.controls.gaugeLevel.value).toBe(0);
+    expect(buttons()[0].getAttribute('aria-pressed')).toBe('true');
+    buttons()[0].click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.form.controls.gaugeLevel.value).toBeNull();
+    expect(buttons().every((button) => button.getAttribute('aria-pressed') === 'false')).toBe(true);
+  });
+  it('uses the configured bar count when displaying a saved reading', () => {
+    const store = TestBed.inject(TrackerStore) as unknown as TestStore;
+    store.settings.update((settings) => ({ ...settings, gaugeSegments: 4 }));
+    store.fills.set([{ ...exampleFill, gaugeLevel: 3 }]);
+    Object.defineProperty(TestBed.inject(ActivatedRoute).snapshot, 'paramMap', {
+      value: convertToParamMap({ id: exampleFill.id }),
+      configurable: true,
+    });
+    const fixture = TestBed.createComponent(FillupFormPage);
+    fixture.componentInstance.ionViewWillEnter();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.gauge-selector button')).toHaveLength(5);
+    expect(fixture.nativeElement.querySelectorAll('.gauge-selector .lit')).toHaveLength(3);
+    expect(fixture.componentInstance.form.pristine).toBe(true);
+  });
   it('saves the captured coordinates and invokes the shared save service', async () => {
     const store = TestBed.inject(TrackerStore) as unknown as TestStore;
     vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);

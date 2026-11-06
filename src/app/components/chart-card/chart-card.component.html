@@ -8,19 +8,18 @@
     <canvas
       #canvas
       role="img"
-      [attr.aria-label]="title() + '. Exact values are in the data table below.'"
+      [attr.aria-label]="title() + '. Values are available below.'"
     ></canvas>
     @if (!hasData()) {
       <div class="chart-empty">
         <span class="mono">—</span>
-        <p>More readings, more perspective.</p>
-        <small>Log fill-ups to build this chart.</small>
+        <p>No chart data yet</p>
       </div>
     }
   </div>
   @if (hasData()) {
     <details>
-      <summary>View chart data</summary>
+      <summary>View values</summary>
       <table>
         <thead>
           <tr>

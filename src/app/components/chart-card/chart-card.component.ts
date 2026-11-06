@@ -130,7 +130,7 @@ export class ChartCardComponent implements AfterViewInit, OnDestroy {
       if (this.benchmark() !== null)
         config.data.datasets.push({
           type: 'line',
-          label: 'WMTC',
+          label: 'Manufacturer rating',
           data: this.labels().map(() => this.benchmark()),
           borderColor: muted,
           backgroundColor: muted,

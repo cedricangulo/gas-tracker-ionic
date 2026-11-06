@@ -25,7 +25,7 @@ export class ApiService {
           .pipe(timeout(12000)),
       );
       if (!response.success)
-        throw new ApiError(response.message ?? 'API request failed.', 500, response.errors);
+        throw new ApiError(response.message ?? 'Could not save. Try again.', 500, response.errors);
       return response.data as T;
     } catch (error) {
       if (error instanceof ApiError) throw error;
@@ -36,13 +36,13 @@ export class ApiService {
           details ||
             body?.message ||
             (error.status === 0
-              ? 'PHP API is unreachable. Check Apache and MySQL in XAMPP.'
-              : 'The PHP API could not complete this request.'),
+              ? 'Cannot connect. Your changes are saved on this device.'
+              : 'Could not complete the request. Try again.'),
           error.status,
           body?.errors,
         );
       }
-      throw new ApiError('The PHP API timed out. Your changes are saved on this device.', 0);
+      throw new ApiError('Connection timed out. Your changes are saved on this device.', 0);
     }
   }
   fills(): Promise<Fillup[]> {
@@ -50,6 +50,21 @@ export class ApiService {
   }
   settings(): Promise<BikeSettings> {
     return this.request('GET', '/settings.php');
+  }
+  async renameStation(from: string, to: string, operationId: string): Promise<BikeSettings> {
+    try {
+      return await this.request('POST', '/settings.php', {
+        operationId,
+        stationRename: { from, to },
+      });
+    } catch (error) {
+      if (error instanceof ApiError && (error.status === 0 || error.status >= 500))
+        throw new ApiError(
+          'Could not confirm the rename. Retry the same name or refresh.',
+          error.status,
+        );
+      throw error;
+    }
   }
   async mutate(op: Mutation): Promise<void> {
     if (op.kind === 'settings')

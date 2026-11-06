@@ -15,6 +15,7 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import L from 'leaflet';
+import { closeOutline, expandOutline } from 'ionicons/icons';
 import 'leaflet.heat';
 import { TrackerStore } from '../../services/tracker-store';
 import { ListViewState } from '../../services/list-view-state';
@@ -61,6 +62,8 @@ export class MapPage implements AfterViewInit, OnDestroy {
   readonly visibleLocated = computed(() => this.located().slice(0, this.listState.mapLimit()));
   readonly stations = computed(() => StationSummary.compare(this.groups(), this.grade()));
   readonly expanded = signal(false);
+  readonly expandIcon = expandOutline;
+  readonly closeIcon = closeOutline;
   @ViewChild('mapSlot', { static: true }) private mapSlot!: ElementRef<HTMLElement>;
   @ViewChild('mapPanel', { static: true }) private mapPanel!: ElementRef<HTMLElement>;
   @ViewChild('expandedMap', { static: true }) private expandedMap!: ElementRef<HTMLDialogElement>;
@@ -131,7 +134,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
         scrollWheelZoom: false,
       }).setView([12.8797, 121.774], 5);
       L.control.zoom({ position: 'bottomright' }).addTo(this.map);
-      const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19,
@@ -161,7 +164,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
     line(
       station.averagePrice !== null
         ? 'Average: ₱' + station.averagePrice.toFixed(2) + '/L'
-        : 'Average: not enough data',
+        : 'Average: unavailable',
     );
     if (station.latestPrice !== null && station.latestPriceDate) {
       line(
@@ -171,11 +174,9 @@ export class MapPage implements AfterViewInit, OnDestroy {
           new Date(station.latestPriceDate).toLocaleDateString('en-PH'),
       );
     } else line('Latest price: not recorded');
-    line(station.pricedCount + ' of ' + station.visitCount + ' fill-ups include price data');
     line('Last visit: ' + new Date(station.lastVisit).toLocaleDateString('en-PH'));
-    if (station.isLowest) line('Lowest recorded average');
-    if (station.includesTestData) line('Includes test data');
-    line('Historical prices, not live offers.');
+    if (station.isLowest) line('Lowest average');
+    line('Saved prices');
     return container;
   }
   private draw(): void {

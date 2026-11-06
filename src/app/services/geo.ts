@@ -19,14 +19,10 @@ export class GeoService {
     } catch (error) {
       const message = error instanceof Error ? error.message : '';
       if (/denied|permission/i.test(message))
-        throw new Error(
-          'Location permission was denied. Allow it in your browser or device settings and try again.',
-        );
+        throw new Error('Allow location access in your device settings, then try again.');
       if (/timeout|timed out/i.test(message))
-        throw new Error('Finding your location took too long. Try again outdoors.');
-      throw new Error(
-        'Location is unavailable. Use HTTPS or localhost, enable location services, and try again.',
-      );
+        throw new Error('Location timed out. Try again outdoors.');
+      throw new Error('Location unavailable. Turn on location services and try again.');
     }
   }
   async haptic(): Promise<void> {

@@ -34,14 +34,15 @@ describe('MapPage', () => {
       value: vi.fn(() => dialog.removeAttribute('open')),
       configurable: true,
     });
-    const button = el.querySelector('.map-view-toolbar button') as HTMLButtonElement;
+    const button = el.querySelector('.map-expand') as HTMLButtonElement;
     button.click();
     fixture.detectChanges();
     expect(show).toHaveBeenCalledOnce();
     expect(page.expanded()).toBe(true);
     expect(dialog.querySelector('.map-canvas')).toBe(canvas);
     expect(dialog.querySelector('#map-grade')).toBe(select);
-    expect(button.textContent).toContain('Close map');
+    expect(button.getAttribute('aria-label')).toBe('Close map');
+    expect(button.closest('.map-frame')).not.toBeNull();
     expect(el.querySelectorAll('.map-canvas')).toHaveLength(1);
     dialog.dispatchEvent(new Event('cancel', { cancelable: true }));
     fixture.detectChanges();
@@ -79,7 +80,7 @@ describe('MapPage', () => {
     const el: HTMLElement = fixture.nativeElement;
     expect(el.querySelector('input[type="date"]')).toBeNull();
     expect(el.textContent).not.toContain('Clear dates');
-    expect(el.textContent).toContain('Historical prices');
+    expect(el.textContent).toContain('Saved prices');
     expect(el.querySelectorAll('a[href^="/fillup/"]')).toHaveLength(2);
     page.selectGrade('premium');
     fixture.detectChanges();
@@ -100,21 +101,18 @@ describe('MapPage', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('No stops pinned yet.');
+    expect(fixture.nativeElement.textContent).toContain('No saved locations');
     expect(fixture.nativeElement.querySelector('select').disabled).toBe(true);
     expect(page.stations()).toEqual([]);
   });
 
-  it('labels test data and ungraded entries without a lowest-price recommendation', () => {
-    store().fills.set([
-      { ...exampleFill, grade: null, notes: 'Manual testing seed. Synthetic: station.' },
-    ]);
+  it('shows ungraded entries without a lowest-price recommendation', () => {
+    store().fills.set([{ ...exampleFill, grade: null }]);
     const fixture = TestBed.createComponent(MapPage);
     fixture.detectChanges();
     const el: HTMLElement = fixture.nativeElement;
-    expect(el.textContent).toContain('Includes test data');
-    expect(el.textContent).toContain('Fuel grade was not recorded');
-    expect(el.textContent).not.toContain('Lowest recorded average');
+    expect(el.textContent).toContain('No fuel grade recorded');
+    expect(el.textContent).not.toContain('Lowest average');
   });
 
   it('drives grouped markers, grade-filtered heat points, list selection and density toggling', async () => {

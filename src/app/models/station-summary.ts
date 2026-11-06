@@ -20,7 +20,7 @@ export interface StationComparison extends StationGroup {
   lastVisit: string;
   visitCount: number;
   pricedCount: number;
-  includesTestData: boolean;
+
   isLowest: boolean;
 }
 
@@ -111,7 +111,7 @@ export class StationSummary {
         lastVisit: fills.at(-1)!.dateTime,
         visitCount: fills.length,
         pricedCount: priced.length,
-        includesTestData: fills.some((f) => f.notes.startsWith('Manual testing seed.')),
+
         isLowest: false,
       });
     }

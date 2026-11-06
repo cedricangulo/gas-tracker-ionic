@@ -6,15 +6,13 @@
           ><ion-icon name="arrow-back-outline" aria-hidden="true"
         /></a>
         <div>
-          <p class="eyebrow">Keep your ride in view</p>
           <h1>{{ editing() ? 'Edit fill-up' : 'New fill-up' }}</h1>
         </div>
       </div>
-      <span class="badge accent">PHP · km · L</span>
     </header>
     <app-sync-banner />
     @if (missing() && !store.remoteChecked()) {
-      <section class="card empty" role="status"><h2>Loading your fill-up?</h2></section>
+      <section class="card empty" role="status"><h2>Loading fill-up…</h2></section>
     } @else if (missing()) {
       <section class="card empty">
         <h2>Entry not found.</h2>
@@ -27,7 +25,7 @@
           <p class="form-error" role="alert" tabindex="-1">{{ error() }}</p>
         }
         <section class="amount-section">
-          <label for="amount" class="eyebrow">How much did you spend?</label>
+          <label for="amount" class="eyebrow">Amount</label>
           <div class="amount-input">
             <span aria-hidden="true">₱</span
             ><input
@@ -60,8 +58,7 @@
         </section>
         <section class="form-section">
           <div class="section-heading">
-            <h2>At the pump</h2>
-            <span class="eyebrow">01 / Fuel</span>
+            <h2>Fuel</h2>
           </div>
           <div class="field">
             <label for="liters">Liters <span>Optional</span></label>
@@ -82,7 +79,6 @@
                   : '— / L'
               }}</span>
             </div>
-            <p class="field-help">Use the exact volume shown on the pump.</p>
             @if (invalid('liters')) {
               <p class="field-error">Liters must be greater than zero, or left blank.</p>
             }
@@ -95,6 +91,7 @@
                   type="button"
                   class="chip"
                   [class.selected]="form.controls.gaugeLevel.value === bar"
+                  [class.lit]="bar > 0 && bar <= (form.controls.gaugeLevel.value ?? 0)"
                   [attr.aria-pressed]="form.controls.gaugeLevel.value === bar"
                   (click)="selectGauge(bar)"
                 >
@@ -102,22 +99,18 @@
                 </button>
               }
             </div>
-            <p class="field-help">
-              Tap a selected reading to clear it. E means the low-fuel anchor.
-            </p>
+            <p class="field-help">Tap the selected level to clear it.</p>
           </div>
           <label class="full-toggle" for="full-tank"
             ><div>
-              <strong>Filled to full</strong
-              ><span>Use this fill for tank-to-tank measurements.</span>
+              <strong>Filled to full</strong><span>Measures fuel use between full tanks.</span>
             </div>
             <input id="full-tank" type="checkbox" formControlName="filledToFull"
           /></label>
         </section>
         <section class="form-section">
           <div class="section-heading">
-            <h2>The details</h2>
-            <span class="eyebrow">02 / Ride</span>
+            <h2>Details</h2>
           </div>
           <div class="stack">
             <div class="field">
@@ -182,10 +175,8 @@
         </section>
         <section class="form-section">
           <div class="section-heading">
-            <h2>Remember this stop</h2>
-            <span class="eyebrow">03 / Location</span>
+            <h2>Location</h2>
           </div>
-          <p class="small muted">Optional. Pin this fill-up so you can see it on your map.</p>
           <button
             type="button"
             class="button secondary wide"
@@ -196,8 +187,8 @@
               locating()
                 ? 'Finding your location…'
                 : location()
-                  ? 'Update current location'
-                  : 'Use current location'
+                  ? 'Update location'
+                  : 'Use my location'
             }}
           </button>
           @if (location(); as coordinates) {
@@ -222,26 +213,15 @@
           }
           @if (locationError()) {
             <p class="field-error" role="alert">
-              {{ locationError() }} You can still save without a location.
+              {{ locationError() }}
             </p>
           }
-          <div class="field notes-field">
-            <label for="notes">Notes <span>Optional</span></label
-            ><textarea
-              id="notes"
-              formControlName="notes"
-              rows="3"
-              maxlength="2000"
-              placeholder="Anything worth remembering about this fill?"
-            ></textarea>
-          </div>
         </section>
         <button type="submit" class="button wide" [disabled]="busy() || locating()">
           <ion-icon name="checkmark-outline" aria-hidden="true" />{{
             busy() ? 'Saving…' : editing() ? 'Save changes' : 'Save fill-up'
           }}
         </button>
-        <p class="save-note">Saved on your device first. Synced with PHP when connected.</p>
       </form>
     }
   </main></ion-content

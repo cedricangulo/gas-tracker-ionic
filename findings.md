@@ -13,3 +13,10 @@
 
 - One bike; 5.5 L, 6 bars, 1.2 L low-fuel anchor, 50 km/L WMTC; Day appearance.
 - Native wrappers and APK deferred. PHP backend local only.
+
+## Normalized schema (2026-11-06)
+
+- `settings` is one typed singleton row for bike configuration. `station_choices` and `grade_choices` store active ordered choices and retain retired values. `fillups` uses nullable foreign keys and the API joins display names back into the existing wire format.
+- XAMPP is MariaDB 10.4.32; migration avoids newer SQL features and can resume across its implicit-commit DDL steps. It writes a version 1 row backup before alterations.
+- Fresh installs import normalized `php-backend/sql/setup.sql`; existing installs run `php-backend/migrate.php` after making a full SQL dump.
+- Live migration preserved one settings row, seven stations, two grades, and 42 fill-ups. The backup is in ignored `artifacts/`.

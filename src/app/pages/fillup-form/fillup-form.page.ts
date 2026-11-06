@@ -52,7 +52,6 @@ export class FillupFormPage {
     odometer: this.fb.control<number | null>(null, [Validators.min(0), Validators.max(999999999)]),
     station: this.fb.control<string | null>(null),
     grade: this.fb.control<string | null>(null),
-    notes: this.fb.nonNullable.control('', Validators.maxLength(2000)),
   });
   readonly currentStation = signal<string | null>(null);
   readonly currentGrade = signal<string | null>(null);
@@ -139,7 +138,6 @@ export class FillupFormPage {
             odometer: null,
             station: null,
             grade: null,
-            notes: '',
           },
     );
     this.location.set(
@@ -191,7 +189,7 @@ export class FillupFormPage {
   private async saveChoice(kind: 'stations' | 'grades', name: string): Promise<void> {
     const cleaned = name.trim();
     if (!cleaned || new TextEncoder().encode(cleaned).length > 80) {
-      this.error.set('Enter a name up to 80 bytes.');
+      this.error.set('Enter a shorter name.');
       return;
     }
     const settings = this.store.settings();
@@ -215,14 +213,10 @@ export class FillupFormPage {
     this.error.set('');
     this.form.markAllAsTouched();
     if (this.form.invalid) {
-      this.error.set('Check the highlighted fields. Amount and date/time are required.');
+      this.error.set('Check the highlighted fields.');
       return;
     }
     const v = this.form.getRawValue();
-    if (new TextEncoder().encode(v.notes).length > 2000) {
-      this.error.set('Notes are too long. Keep them within 2000 bytes.');
-      return;
-    }
     this.busy.set(true);
     try {
       const fill: Fillup = {
@@ -232,16 +226,13 @@ export class FillupFormPage {
         createdAt: this.original?.createdAt ?? Date.now(),
         latitude: this.location()?.latitude ?? null,
         longitude: this.location()?.longitude ?? null,
-        notes: v.notes.trim(),
       };
       await this.store.saveFill(fill, this.editing());
       this.form.markAsPristine();
       await this.geo.haptic();
       await this.router.navigateByUrl('/log', { replaceUrl: true });
     } catch (error) {
-      this.error.set(
-        error instanceof Error ? error.message : 'Could not save. Your form has been kept.',
-      );
+      this.error.set(error instanceof Error ? error.message : 'Could not save. Try again.');
     } finally {
       this.busy.set(false);
     }

@@ -1,28 +1,12 @@
 <ion-content [scrollEvents]="true" (ionScroll)="rememberScroll($event)"
   ><main class="page map-page">
     <header class="page-top">
-      <div>
-        <p class="eyebrow">Gas Tracker / Places</p>
-        <h1>Your usual stops.</h1>
-        <p class="subheading">Explore your stops. Compare your fuel prices.</p>
-      </div>
+      <h1>Map</h1>
       <span class="badge accent">{{ stations().length }} stations</span>
     </header>
     <app-sync-banner />
     <div #mapSlot>
       <div #mapPanel class="map-panel" [class.is-expanded]="expanded()">
-        <div class="map-view-toolbar">
-          @if (expanded()) {
-            <strong>Station map</strong>
-          }
-          <button
-            class="button secondary"
-            type="button"
-            (click)="expanded() ? closeExpandedMap() : expandMap($event)"
-          >
-            {{ expanded() ? 'Close map' : 'Expand map' }}
-          </button>
-        </div>
         <section class="card map-controls" aria-label="Map options">
           <div class="field">
             <label for="map-grade">Fuel grade</label
@@ -46,12 +30,8 @@
               id="heatmap-toggle"
               [ngModel]="heat()"
               (ngModelChange)="heat.set($event)"
-            /><span class="small">Show density heatmap</span></label
+            /><span class="small">Heatmap</span></label
           >
-          <p class="field-help">
-            All recorded dates · {{ located().length }} visits for {{ gradeLabel() }}. Hotter areas
-            mean more visits, not lower prices.
-          </p>
           @if (heat()) {
             <div
               class="heat-legend"
@@ -69,25 +49,38 @@
             aria-label="Map of fuel stations"
             tabindex="-1"
           ></div>
-          <button
-            class="map-locate icon-button"
-            [disabled]="locating()"
-            (click)="locate()"
-            aria-label="Center map on current location"
-          >
-            <ion-icon name="navigate-outline" aria-hidden="true" />
-          </button>
+          <div class="map-actions">
+            <button
+              class="map-expand icon-button"
+              type="button"
+              (click)="expanded() ? closeExpandedMap() : expandMap($event)"
+              [attr.aria-label]="expanded() ? 'Close map' : 'Expand map'"
+              [attr.title]="expanded() ? 'Close map' : 'Expand map'"
+              [attr.aria-expanded]="expanded()"
+              [attr.aria-haspopup]="expanded() ? null : 'dialog'"
+            >
+              <ion-icon [icon]="expanded() ? closeIcon : expandIcon" aria-hidden="true" />
+            </button>
+            <button
+              class="map-locate icon-button"
+              type="button"
+              [disabled]="locating()"
+              (click)="locate()"
+              aria-label="Center map on current location"
+              title="My location"
+            >
+              <ion-icon name="navigate-outline" aria-hidden="true" />
+            </button>
+          </div>
         </div>
         @if (locating()) {
-          <p class="small muted" role="status">Finding your current location…</p>
+          <p class="small muted" role="status">Finding location…</p>
         }
         @if (error()) {
           <p class="form-error" role="alert">{{ error() }}</p>
         }
         @if (tileError() || !store.online()) {
-          <p class="helper-card">
-            Map tiles need an internet connection. Your saved station comparisons are listed below.
-          </p>
+          <p class="helper-card">Map unavailable. Your saved stations are still available.</p>
         }
       </div>
     </div>
@@ -101,22 +94,15 @@
     @if (!located().length) {
       <section class="card empty">
         <ion-icon class="empty-icon" name="location-outline" aria-hidden="true" />
-        <h2>No stops pinned yet.</h2>
-        <p>Use “Use current location” when logging a fill-up to compare your stations here.</p>
+        <h2>No saved locations</h2>
+        <p>Add a location to a fill-up to see it here.</p>
       </section>
     } @else {
       <section class="station-comparisons" aria-labelledby="comparison-heading">
         <h2 id="comparison-heading">Station comparison</h2>
-        <p class="small muted">
-          Historical prices for {{ gradeLabel() }}, sorted by average price. Average ₱/L is total
-          spend divided by total liters from priced fill-ups. These are saved prices, not live
-          offers.
-        </p>
+        <p class="small muted">Saved prices · By average price.</p>
         @if (grade() === '') {
-          <p class="helper-card">
-            Fuel grade was not recorded. These entries may use different fuels, so no lowest-price
-            recommendation is shown.
-          </p>
+          <p class="helper-card">No fuel grade recorded. Prices may be for different fuels.</p>
         }
         <div class="stack">
           @for (station of stations(); track station.id) {
@@ -137,10 +123,7 @@
               </p>
               <div class="station-badges">
                 @if (station.isLowest) {
-                  <span class="badge accent">Lowest recorded average</span>
-                }
-                @if (station.includesTestData) {
-                  <span class="badge">Includes test data</span>
+                  <span class="badge accent">Lowest average</span>
                 }
               </div>
               <dl class="station-prices">
@@ -150,7 +133,7 @@
                     {{
                       station.averagePrice !== null
                         ? (station.averagePrice | currency: 'PHP' : 'symbol' : '1.2-2')
-                        : 'Not enough data'
+                        : 'Unavailable'
                     }}
                   </dd>
                 </div>
@@ -169,8 +152,8 @@
                 </div>
               </dl>
               <p class="small muted station-foot">
-                {{ station.pricedCount }} of {{ station.visitCount }} fill-ups include price data ·
-                Last visit {{ station.lastVisit | date: 'MMM d, y' }}
+                {{ station.pricedCount }} of {{ station.visitCount }} priced fill-ups · Last visit
+                {{ station.lastVisit | date: 'MMM d, y' }}
               </p>
             </article>
           }
@@ -178,7 +161,6 @@
       </section>
       <section class="card map-records">
         <h2>Located fill-ups</h2>
-        <p class="small muted">Your {{ gradeLabel() }} entries across all dates.</p>
         <ul>
           @for (fill of visibleLocated(); track fill.id) {
             <li>

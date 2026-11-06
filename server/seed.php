@@ -25,7 +25,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4273549,
         "longitude": 120.9549514,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1781763720000
       },
       {
@@ -40,7 +40,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.428016,
         "longitude": 120.9543929,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time, liters, odometer. Other recorded input values preserved.",
+
         "createdAt": 1782109500001
       },
       {
@@ -55,7 +55,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4556925,
         "longitude": 120.9487661,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time, liters, odometer. Other recorded input values preserved.",
+
         "createdAt": 1782628020002
       },
       {
@@ -70,7 +70,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4273549,
         "longitude": 120.9549514,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time, liters, odometer. Other recorded input values preserved.",
+
         "createdAt": 1782973560003
       },
       {
@@ -85,7 +85,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.428016,
         "longitude": 120.9543929,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time, liters, odometer. Other recorded input values preserved.",
+
         "createdAt": 1783146180004
       },
       {
@@ -100,7 +100,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4556925,
         "longitude": 120.9487661,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time, liters, odometer. Other recorded input values preserved.",
+
         "createdAt": 1783319700005
       },
       {
@@ -115,7 +115,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4273549,
         "longitude": 120.9549514,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time, liters. Other recorded input values preserved.",
+
         "createdAt": 1783924620006
       },
       {
@@ -130,7 +130,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.428016,
         "longitude": 120.9543929,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time, liters, odometer. Other recorded input values preserved.",
+
         "createdAt": 1784788260007
       },
       {
@@ -145,7 +145,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4556925,
         "longitude": 120.9487661,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time, liters. Other recorded input values preserved.",
+
         "createdAt": 1784874900008
       },
       {
@@ -160,7 +160,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4273549,
         "longitude": 120.9549514,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time, liters. Other recorded input values preserved.",
+
         "createdAt": 1785220440009
       },
       {
@@ -175,7 +175,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.428016,
         "longitude": 120.9543929,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time, liters. Other recorded input values preserved.",
+
         "createdAt": 1785392700010
       },
       {
@@ -190,7 +190,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4556925,
         "longitude": 120.9487661,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time, liters, odometer. Other recorded input values preserved.",
+
         "createdAt": 1785565500011
       },
       {
@@ -205,7 +205,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4273549,
         "longitude": 120.9549514,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time, liters. Other recorded input values preserved.",
+
         "createdAt": 1786257180012
       },
       {
@@ -220,7 +220,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.428016,
         "longitude": 120.9543929,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time, liters. Other recorded input values preserved.",
+
         "createdAt": 1786429440013
       },
       {
@@ -235,7 +235,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4556925,
         "longitude": 120.9487661,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time, liters. Other recorded input values preserved.",
+
         "createdAt": 1786861680014
       },
       {
@@ -250,7 +250,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4273549,
         "longitude": 120.9549514,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1787207520015
       },
       {
@@ -265,7 +265,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.428016,
         "longitude": 120.9543929,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1787379780016
       },
       {
@@ -280,7 +280,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4556925,
         "longitude": 120.9487661,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1787466300017
       },
       {
@@ -295,7 +295,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4273549,
         "longitude": 120.9549514,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1787639400018
       },
       {
@@ -310,7 +310,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.428016,
         "longitude": 120.9543929,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1788417240019
       },
       {
@@ -325,7 +325,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4556925,
         "longitude": 120.9487661,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1788762480020
       },
       {
@@ -340,7 +340,7 @@ function seed_rows(): array
         "filledToFull": true,
         "latitude": 15.4273549,
         "longitude": 120.9549514,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1789281060021
       },
       {
@@ -355,7 +355,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.428016,
         "longitude": 120.9543929,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1789626540022
       },
       {
@@ -370,7 +370,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4556925,
         "longitude": 120.9487661,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1789885800023
       },
       {
@@ -385,7 +385,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4273549,
         "longitude": 120.9549514,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1790058840024
       },
       {
@@ -400,7 +400,7 @@ function seed_rows(): array
         "filledToFull": true,
         "latitude": 15.428016,
         "longitude": 120.9543929,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1790481960025
       },
       {
@@ -415,7 +415,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4556925,
         "longitude": 120.9487661,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1790499480026
       },
       {
@@ -430,7 +430,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4273549,
         "longitude": 120.9549514,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1790560320027
       },
       {
@@ -445,7 +445,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.428016,
         "longitude": 120.9543929,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1790569560028
       },
       {
@@ -460,7 +460,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4556925,
         "longitude": 120.9487661,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, odometer. Other recorded input values preserved.",
+
         "createdAt": 1790580000029
       },
       {
@@ -475,7 +475,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4273549,
         "longitude": 120.9549514,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1790836200030
       },
       {
@@ -490,7 +490,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.428016,
         "longitude": 120.9543929,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1791009180031
       },
       {
@@ -505,7 +505,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4556925,
         "longitude": 120.9487661,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1791181560032
       },
       {
@@ -520,7 +520,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4273549,
         "longitude": 120.9549514,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1791267780033
       },
       {
@@ -535,7 +535,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.428016,
         "longitude": 120.9543929,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1791440820034
       },
       {
@@ -550,7 +550,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4556925,
         "longitude": 120.9487661,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1791787080035
       },
       {
@@ -565,7 +565,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4273549,
         "longitude": 120.9549514,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1793082780036
       },
       {
@@ -580,7 +580,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.428016,
         "longitude": 120.9543929,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade, time. Other recorded input values preserved.",
+
         "createdAt": 1793168940037
       },
       {
@@ -595,7 +595,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4556925,
         "longitude": 120.9487661,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade. Other recorded input values preserved.",
+
         "createdAt": 1793454240038
       },
       {
@@ -610,7 +610,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4273549,
         "longitude": 120.9549514,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade. Other recorded input values preserved.",
+
         "createdAt": 1793521260039
       },
       {
@@ -625,7 +625,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.428016,
         "longitude": 120.9543929,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade. Other recorded input values preserved.",
+
         "createdAt": 1793645340040
       },
       {
@@ -640,7 +640,7 @@ function seed_rows(): array
         "filledToFull": false,
         "latitude": 15.4556925,
         "longitude": 120.9487661,
-        "notes": "Manual testing seed. Synthetic: station, coordinates, grade. Other recorded input values preserved.",
+
         "createdAt": 1793859060041
       }
     ]
@@ -652,28 +652,38 @@ function seed_rows(): array
 function seed_columns(): array
 {
     return [
-        'settings' => ['id', 'payload'],
+        'settings' => [
+            'id',
+            'name',
+            'tank_capacity',
+            'gauge_segments',
+            'low_fuel_anchor',
+            'factory_wmtc',
+        ],
+        'station_choices' => ['id', 'name', 'is_active', 'sort_order'],
+        'grade_choices' => ['id', 'name', 'is_active', 'sort_order'],
         'fillups' => [
             'id',
             'amount',
             'liters',
             'odometer',
             'date_time',
-            'station',
-            'grade',
+            'station_choice_id',
+            'grade_choice_id',
             'gauge_level',
             'filled_to_full',
             'latitude',
             'longitude',
-            'notes',
+
             'created_at',
+            'archived_at',
         ],
         'mutation_receipts' => ['operation_id', 'fingerprint', 'status', 'payload', 'created_at'],
     ];
 }
 
 /** @param array<string, mixed> $settings
- *  @return list<array<string, mixed>>
+ *  @return list<array{id: string, amount: float, liters: float|null, odometer: float|null, dateTime: string, station: string|null, grade: string|null, gaugeLevel: int|null, filledToFull: bool, latitude: float|null, longitude: float|null, createdAt: int}>
  */
 function seed_validated_rows(array $settings): array
 {
@@ -695,6 +705,28 @@ function seed_validated_rows(array $settings): array
     return $result;
 }
 
+/** Remove only retired fill-up notes from replay payloads; receipt identity stays intact.
+ *  @param list<array<string, mixed>> $rows
+ *  @return list<array<string, mixed>>
+ */
+function seed_clean_receipts(array $rows): array
+{
+    foreach ($rows as &$row) {
+        $payload = json_decode(db_string($row['payload']), false, 64, JSON_THROW_ON_ERROR);
+        if (
+            $payload instanceof stdClass &&
+            isset($payload->data) &&
+            $payload->data instanceof stdClass &&
+            property_exists($payload->data, 'notes')
+        ) {
+            unset($payload->data->notes);
+        }
+        $row['payload'] = json_encode($payload, JSON_THROW_ON_ERROR);
+    }
+    unset($row);
+    return $rows;
+}
+
 /** @return array<string, list<array<string, mixed>>> */
 function seed_snapshot(PDO $pdo): array
 {
@@ -711,14 +743,24 @@ function seed_snapshot(PDO $pdo): array
             $tables[$table][] = object_array($row);
         }
     }
+    $tables['mutation_receipts'] = seed_clean_receipts($tables['mutation_receipts']);
     return $tables;
 }
 
 /** @param array<string, list<array<string, mixed>>> $tables */
 function seed_replace(PDO $pdo, array $tables): void
 {
-    foreach (seed_columns() as $table => $columns) {
+    foreach (
+        ['fillups', 'mutation_receipts', 'station_choices', 'grade_choices', 'settings']
+        as $table
+    ) {
         $pdo->exec('DELETE FROM ' . $table);
+    }
+    foreach (
+        ['settings', 'station_choices', 'grade_choices', 'fillups', 'mutation_receipts']
+        as $table
+    ) {
+        $columns = seed_columns()[$table];
         $stmt = $pdo->prepare(
             'INSERT INTO ' .
                 $table .
@@ -743,7 +785,7 @@ function seed_replace(PDO $pdo, array $tables): void
 }
 
 /** @param array<string, list<array<string, mixed>>> $tables */
-function seed_write_backup(PDO $pdo, array $tables, string $directory): string
+function seed_write_backup(PDO $pdo, array $tables, string $directory, int $version = 3): string
 {
     if (file_exists($directory) && !is_dir($directory)) {
         throw new RuntimeException('Backup path is not a directory.');
@@ -755,7 +797,7 @@ function seed_write_backup(PDO $pdo, array $tables, string $directory): string
         $directory . '/seed-backup-' . gmdate('Ymd-His') . '-' . bin2hex(random_bytes(6)) . '.json';
     $json = json_encode(
         [
-            'version' => 1,
+            'version' => $version,
             'database' => query_statement($pdo, 'SELECT DATABASE()')->fetchColumn(),
             'createdAt' => gmdate(DATE_ATOM),
             'tables' => $tables,
@@ -776,6 +818,124 @@ function seed_write_backup(PDO $pdo, array $tables, string $directory): string
     return $path;
 }
 
+/** @param array<string, list<array<string, mixed>>> $legacy
+ *  @return array<string, list<array<string, mixed>>>
+ */
+function seed_convert_legacy_tables(array $legacy): array
+{
+    if (
+        count($legacy['settings'] ?? []) !== 1 ||
+        !is_string($legacy['settings'][0]['payload'] ?? null)
+    ) {
+        throw new RuntimeException('Invalid legacy settings backup.');
+    }
+    $payload = json_decode($legacy['settings'][0]['payload'], true, 32, JSON_THROW_ON_ERROR);
+    if (!is_array($payload)) {
+        throw new RuntimeException('Invalid legacy settings payload.');
+    }
+    $settings = validate_settings(object_array($payload));
+    $stationNames = $settings['stations'];
+    $gradeNames = $settings['grades'];
+    foreach ($legacy['fillups'] ?? [] as $fill) {
+        foreach (['station' => &$stationNames, 'grade' => &$gradeNames] as $field => &$names) {
+            $name = $fill[$field] ?? null;
+            if (
+                is_string($name) &&
+                $name !== '' &&
+                !in_array(
+                    mb_strtolower($name, 'UTF-8'),
+                    array_map(
+                        static fn(string $item): string => mb_strtolower($item, 'UTF-8'),
+                        $names,
+                    ),
+                    true,
+                )
+            ) {
+                $names[] = $name;
+            }
+        }
+        unset($names);
+    }
+    $makeCatalog = static function (array $names, array $active): array {
+        $rows = [];
+        $ids = [];
+        foreach ($names as $index => $name) {
+            $id = $index + 1;
+            $ids[mb_strtolower($name, 'UTF-8')] = $id;
+            $rows[] = [
+                'id' => $id,
+                'name' => $name,
+                'is_active' => in_array(
+                    mb_strtolower($name, 'UTF-8'),
+                    array_map(
+                        static fn(string $item): string => mb_strtolower($item, 'UTF-8'),
+                        $active,
+                    ),
+                    true,
+                )
+                    ? 1
+                    : 0,
+                'sort_order' =>
+                    array_search(
+                        mb_strtolower($name, 'UTF-8'),
+                        array_map(
+                            static fn(string $item): string => mb_strtolower($item, 'UTF-8'),
+                            $active,
+                        ),
+                        true,
+                    ) ?:
+                    0,
+            ];
+        }
+        return [$rows, $ids];
+    };
+    [$stationRows, $stationIds] = $makeCatalog($stationNames, $settings['stations']);
+    [$gradeRows, $gradeIds] = $makeCatalog($gradeNames, $settings['grades']);
+    $newFills = [];
+    foreach ($legacy['fillups'] ?? [] as $fill) {
+        $station = $fill['station'] ?? null;
+        $grade = $fill['grade'] ?? null;
+        $newFills[] = [
+            'id' => $fill['id'],
+            'amount' => $fill['amount'],
+            'liters' => $fill['liters'],
+            'odometer' => $fill['odometer'],
+            'date_time' => $fill['date_time'],
+            'station_choice_id' =>
+                is_string($station) && $station !== ''
+                    ? $stationIds[mb_strtolower($station, 'UTF-8')] ?? null
+                    : null,
+            'grade_choice_id' =>
+                is_string($grade) && $grade !== ''
+                    ? $gradeIds[mb_strtolower($grade, 'UTF-8')] ?? null
+                    : null,
+            'gauge_level' => $fill['gauge_level'],
+            'filled_to_full' => $fill['filled_to_full'],
+            'latitude' => $fill['latitude'],
+            'longitude' => $fill['longitude'],
+
+            'created_at' => $fill['created_at'],
+            'archived_at' => $fill['archived_at'] ?? null,
+        ];
+    }
+    return [
+        'settings' => [
+            [
+                'id' => 1,
+                'name' => $settings['name'],
+                'tank_capacity' => $settings['tankCapacity'],
+                'gauge_segments' => $settings['gaugeSegments'],
+                'low_fuel_anchor' => $settings['lowFuelAnchor'],
+                'factory_wmtc' => $settings['factoryWMTC'],
+            ],
+        ],
+        'station_choices' => $stationRows,
+        'grade_choices' => $gradeRows,
+        'fillups' => $newFills,
+        'mutation_receipts' => seed_clean_receipts($legacy['mutation_receipts'] ?? []),
+    ];
+}
+
 /** @return array<string, list<array<string, mixed>>> */
 function seed_read_backup(PDO $pdo, string $path): array
 {
@@ -786,12 +946,28 @@ function seed_read_backup(PDO $pdo, string $path): array
     $decoded = json_decode($raw, true, 64, JSON_THROW_ON_ERROR);
     if (
         !is_array($decoded) ||
-        ($decoded['version'] ?? null) !== 1 ||
+        !in_array($decoded['version'] ?? null, [1, 2, 3], true) ||
         ($decoded['database'] ?? null) !==
             query_statement($pdo, 'SELECT DATABASE()')->fetchColumn() ||
         !is_array($decoded['tables'] ?? null)
     ) {
         throw new RuntimeException('Backup version or database does not match.');
+    }
+    $version = $decoded['version'];
+    if ($version === 1) {
+        $legacy = $decoded['tables'];
+        $legacyTables = [];
+        foreach (['settings', 'fillups', 'mutation_receipts'] as $table) {
+            $rows = $legacy[$table] ?? null;
+            if (!is_array($rows) || !array_is_list($rows)) {
+                throw new RuntimeException('Invalid legacy backup table: ' . $table);
+            }
+            $legacyTables[$table] = array_map(
+                static fn(mixed $row): array => object_array($row),
+                $rows,
+            );
+        }
+        return seed_convert_legacy_tables($legacyTables);
     }
     $tables = [];
     foreach (seed_columns() as $table => $columns) {
@@ -801,8 +977,20 @@ function seed_read_backup(PDO $pdo, string $path): array
         }
         $tables[$table] = [];
         foreach ($rows as $row) {
-            if (!is_array($row) || count($row) !== count($columns)) {
+            if ($table === 'fillups' && is_array($row) && $version === 2) {
+                unset($row['notes']);
+                $row['archived_at'] ??= null;
+            }
+            $oldFillupShape =
+                $table === 'fillups' &&
+                is_array($row) &&
+                !array_key_exists('archived_at', $row) &&
+                count($row) === count($columns) - 1;
+            if (!is_array($row) || (count($row) !== count($columns) && !$oldFillupShape)) {
                 throw new RuntimeException('Invalid backup columns.');
+            }
+            if ($oldFillupShape) {
+                $row['archived_at'] = null;
             }
             foreach ($columns as $column) {
                 if (
@@ -818,9 +1006,72 @@ function seed_read_backup(PDO $pdo, string $path): array
     if (count($tables['settings']) !== 1 || db_number($tables['settings'][0]['id']) !== 1.0) {
         throw new RuntimeException('Missing singleton settings.');
     }
+    $tables['mutation_receipts'] = seed_clean_receipts($tables['mutation_receipts']);
     return $tables;
 }
 
+/** @param array{name: string, tankCapacity: float, gaugeSegments: int, lowFuelAnchor: float, factoryWMTC: float, stations: list<string>, grades: list<string>} $settings
+ *  @param list<array{id: string, amount: float, liters: float|null, odometer: float|null, dateTime: string, station: string|null, grade: string|null, gaugeLevel: int|null, filledToFull: bool, latitude: float|null, longitude: float|null, createdAt: int}> $fills
+ *  @return array<string, list<array<string, mixed>>>
+ */
+function seed_tables_from_data(array $settings, array $fills): array
+{
+    $makeCatalog = static function (array $names): array {
+        $rows = [];
+        $ids = [];
+        foreach ($names as $index => $name) {
+            $id = $index + 1;
+            $rows[] = ['id' => $id, 'name' => $name, 'is_active' => 1, 'sort_order' => $index];
+            $ids[mb_strtolower($name, 'UTF-8')] = $id;
+        }
+        return [$rows, $ids];
+    };
+    [$stations, $stationIds] = $makeCatalog($settings['stations']);
+    [$grades, $gradeIds] = $makeCatalog($settings['grades']);
+    $rows = [];
+    foreach ($fills as $fill) {
+        $rows[] = [
+            'id' => $fill['id'],
+            'amount' => $fill['amount'],
+            'liters' => $fill['liters'],
+            'odometer' => $fill['odometer'],
+            'date_time' => $fill['dateTime'],
+            'station_choice_id' =>
+                $fill['station'] === null
+                    ? null
+                    : $stationIds[mb_strtolower($fill['station'], 'UTF-8')],
+            'grade_choice_id' =>
+                $fill['grade'] === null ? null : $gradeIds[mb_strtolower($fill['grade'], 'UTF-8')],
+            'gauge_level' => $fill['gaugeLevel'],
+            'filled_to_full' => $fill['filledToFull'] ? 1 : 0,
+            'latitude' => $fill['latitude'],
+            'longitude' => $fill['longitude'],
+
+            'created_at' => $fill['createdAt'],
+            'archived_at' => null,
+        ];
+    }
+    return [
+        'settings' => [
+            [
+                'id' => 1,
+                'name' => $settings['name'],
+                'tank_capacity' => $settings['tankCapacity'],
+                'gauge_segments' => $settings['gaugeSegments'],
+                'low_fuel_anchor' => $settings['lowFuelAnchor'],
+                'factory_wmtc' => $settings['factoryWMTC'],
+            ],
+        ],
+        'station_choices' => $stations,
+        'grade_choices' => $grades,
+        'fillups' => $rows,
+        'mutation_receipts' => [],
+    ];
+}
+
+/** Back up under the same settings-row lock used by API writers, then atomically replace.
+ *  @param array<string, list<array<string, mixed>>>|null $restore
+ */
 /** Back up under the same settings-row lock used by API writers, then atomically replace.
  *  @param array<string, list<array<string, mixed>>>|null $restore
  */
@@ -841,30 +1092,7 @@ function seed_apply(PDO $pdo, string $backupDirectory, ?array $restore = null): 
                 'grades',
             );
             $fills = seed_validated_rows($settings);
-            $restore = [
-                'settings' => [
-                    ['id' => 1, 'payload' => json_encode($settings, JSON_THROW_ON_ERROR)],
-                ],
-                'fillups' => [],
-                'mutation_receipts' => [],
-            ];
-            foreach ($fills as $fill) {
-                $restore['fillups'][] = [
-                    'id' => $fill['id'],
-                    'amount' => $fill['amount'],
-                    'liters' => $fill['liters'],
-                    'odometer' => $fill['odometer'],
-                    'date_time' => $fill['dateTime'],
-                    'station' => $fill['station'],
-                    'grade' => $fill['grade'],
-                    'gauge_level' => $fill['gaugeLevel'],
-                    'filled_to_full' => $fill['filledToFull'] ? 1 : 0,
-                    'latitude' => $fill['latitude'],
-                    'longitude' => $fill['longitude'],
-                    'notes' => $fill['notes'],
-                    'created_at' => $fill['createdAt'],
-                ];
-            }
+            $restore = seed_tables_from_data($settings, $fills);
         }
         $backup = seed_write_backup($pdo, $before, $backupDirectory);
         seed_replace($pdo, $restore);

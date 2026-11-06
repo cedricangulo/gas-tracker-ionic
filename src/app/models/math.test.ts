@@ -26,7 +26,7 @@ const fill = (n: number, changes: Partial<Fillup> = {}): Fillup => ({
   filledToFull: true,
   latitude: null,
   longitude: null,
-  notes: '',
+
   createdAt: n,
   ...changes,
 });

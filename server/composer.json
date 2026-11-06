@@ -7,7 +7,7 @@
   },
   "require": {},
   "scripts": {
-    "analyse": "phpstan analyse api seed.php --level=9 --no-progress",
+    "analyse": "phpstan analyse api seed.php migrate.php --level=9 --no-progress",
     "test": "phpunit --bootstrap api/helpers.php tests"
   }
 }

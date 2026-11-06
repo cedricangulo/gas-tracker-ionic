@@ -21,3 +21,23 @@ export function rebase(state: Snapshot, fills: Fillup[], settings: BikeSettings)
     settings,
   });
 }
+
+/** Remove the retired field from stored records and queued drafts without resetting data. */
+export function withoutLegacyNotes(state: Snapshot): Snapshot {
+  const clean = (fill: Fillup): Fillup => {
+    const copy = { ...fill } as Fillup & { notes?: unknown };
+    delete copy.notes;
+    return copy;
+  };
+  return {
+    ...state,
+    fills: state.fills.map(clean),
+    queue: state.queue.map((item) => ({
+      ...item,
+      mutation:
+        item.mutation.kind === 'create' || item.mutation.kind === 'update'
+          ? { ...item.mutation, fill: clean(item.mutation.fill) }
+          : item.mutation,
+    })),
+  };
+}

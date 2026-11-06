@@ -1,13 +1,6 @@
 .form-page h1 {
   font-size: 32px;
 }
-.page-top .eyebrow {
-  font-size: 9px;
-  margin-bottom: 7px;
-}
-.page-top .badge {
-  white-space: nowrap;
-}
 .entry-form > .form-error {
   margin-bottom: 20px;
 }
@@ -45,9 +38,6 @@
 }
 .section-heading h2 {
   font-size: 25px;
-}
-.section-heading .eyebrow {
-  font-size: 9px;
 }
 .liters-row {
   display: flex;
@@ -111,12 +101,9 @@
   margin-top: 4px;
   color: var(--muted);
 }
-.notes-field {
-  margin-top: 24px;
-}
-.save-note {
-  text-align: center;
-  color: var(--muted);
-  font-size: 12px;
-  margin: 13px 0 0;
+
+.gauge-selector .chip.lit {
+  color: var(--ion-color-primary-contrast);
+  background: var(--accent);
+  border-color: var(--accent);
 }
