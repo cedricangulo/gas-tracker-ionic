@@ -152,7 +152,7 @@ The course's installable APK, 3â€“5 page report, and 8â€“12 minute rec
 
 ## Vehicle Compatibility Notice
 
-This application is designed and calibrated specifically for motorcycles that have a similar instrument panel to the Honda Click 123i/125i V4 (segmented fuel gauge bars + low-fuel anchor behavior).
+This application is designed and calibrated specifically for motorcycles that have a similar instrument panel to the Honda Click 125i V4 (segmented fuel gauge bars + low-fuel anchor behavior).
 It does **not** fully support all vehicle types.
 
 - Motorcycles or vehicles that lack a multi-segment fuel gauge on the dashboard
