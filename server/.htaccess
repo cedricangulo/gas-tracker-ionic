@@ -1,4 +1,6 @@
 Options -Indexes
 RewriteEngine On
-RewriteRule ^api/(fillups|settings)\.php$ - [L]
+RewriteCond %{HTTP:Authorization} .
+RewriteRule ^api/(auth|fillups|settings)\.php$ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]
+RewriteRule ^api/(auth|fillups|settings)\.php$ - [L]
 RewriteRule ^ - [F,L]

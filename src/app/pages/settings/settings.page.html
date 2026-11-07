@@ -162,5 +162,18 @@
         <p class="small muted">No active stations.</p>
       }
     </section>
-  </main></ion-content
->
+    <div class="settings-account-action">
+      @if (auth.error()) {
+        <p class="form-error" role="alert">{{ auth.error() }}</p>
+      }
+      <button
+        type="button"
+        class="button wide destructive"
+        [disabled]="signingOut()"
+        (click)="signOut()"
+      >
+        {{ signingOut() ? 'Signing out…' : 'Sign out' }}
+      </button>
+    </div>
+  </main>
+</ion-content>

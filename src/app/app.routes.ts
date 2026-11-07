@@ -1,14 +1,21 @@
 import { unsavedFillupGuard } from './guards/unsaved-fillup-guard';
+import { authGuard } from './guards/auth-guard';
 import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
+    path: 'login',
+    loadComponent: () => import('./pages/login/login.page').then((m) => m.LoginPage),
+  },
+  {
     path: 'fillup/:id',
+    canActivate: [authGuard],
     canDeactivate: [unsavedFillupGuard],
     loadComponent: () =>
       import('./pages/fillup-form/fillup-form.page').then((m) => m.FillupFormPage),
   },
   {
     path: '',
+    canActivate: [authGuard],
     loadComponent: () => import('./components/shell/shell.component').then((m) => m.ShellComponent),
     children: [
       {
@@ -28,5 +35,5 @@ export const routes: Routes = [
       { path: '', pathMatch: 'full', redirectTo: 'home' },
     ],
   },
-  { path: '**', redirectTo: 'home' },
+  { path: '**', redirectTo: 'login' },
 ];

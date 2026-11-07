@@ -10,6 +10,7 @@ try {
         throw new InputError(405, 'This action is not available.');
     }
     $pdo = database();
+    require_authenticated($pdo);
     if ($method === 'GET') {
         respond(200, ['success' => true, 'data' => get_settings($pdo)]);
     }

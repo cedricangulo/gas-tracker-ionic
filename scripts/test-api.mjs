@@ -40,11 +40,25 @@ try {
       '$s=stream_socket_server("tcp://127.0.0.1:0"); echo parse_url("tcp://".stream_socket_get_name($s,false),PHP_URL_PORT);',
     ),
   );
-  server = spawn(php, ['-S', '127.0.0.1:' + port, '-t', root], {
-    env: { ...process.env, GAS_TRACKER_DB: database },
-    stdio: ['ignore', 'ignore', 'pipe'],
-    windowsHide: true,
-  });
+  const testPassword = 'Integration-Only-Password-84!';
+  const testPasswordHash = runPhp(
+    'echo password_hash(' + JSON.stringify(testPassword) + ', PASSWORD_DEFAULT);',
+  );
+  server = spawn(
+    php,
+    ['-S', '127.0.0.1:' + port, '-t', root],
+    {
+      env: {
+        ...process.env,
+        GAS_TRACKER_DB: database,
+        GAS_TRACKER_ACCOUNT_USERNAME: 'owner',
+        GAS_TRACKER_ACCOUNT_PASSWORD_HASH: testPasswordHash,
+        GAS_TRACKER_REQUIRE_HTTPS: 'false',
+      },
+      stdio: ['ignore', 'ignore', 'pipe'],
+      windowsHide: true,
+    },
+  );
   let serverErrors = '';
   server.stderr.on('data', (chunk) => {
     serverErrors += chunk.toString();
@@ -53,7 +67,7 @@ try {
   let ready = false;
   for (let i = 0; i < 40; i++) {
     try {
-      if ((await fetch(base + 'settings.php')).ok) {
+      if ((await fetch(base + 'auth.php')).ok) {
         ready = true;
         break;
       }
@@ -61,10 +75,17 @@ try {
     await delay(150);
   }
   assert.ok(ready, 'PHP server did not start: ' + serverErrors);
+  let accessToken = '';
   async function request(path, method = 'GET', body, extra = {}) {
+    const headers = {
+      'Content-Type': 'application/json',
+      Origin: 'http://localhost:8100',
+      ...(accessToken ? { Authorization: 'Bearer ' + accessToken } : {}),
+      ...extra,
+    };
     const res = await fetch(base + path, {
       method,
-      headers: { 'Content-Type': 'application/json', ...extra },
+      headers,
       ...(body !== undefined
         ? { body: typeof body === 'string' ? body : JSON.stringify(body) }
         : {}),
@@ -76,8 +97,48 @@ try {
     } catch {
       throw new Error('Non-JSON response: ' + text);
     }
+    if (data?.data?.accessToken) accessToken = data.data.accessToken;
+    if (data?.data?.authenticated === false && method === 'POST') accessToken = '';
     return { status: res.status, body: data, headers: res.headers };
   }
+  await check('API requires a bearer token', async () => {
+    assert.equal((await request('settings.php')).status, 401);
+    assert.equal((await request('fillups.php')).status, 401);
+    const status = await request('auth.php');
+    assert.equal(status.status, 200);
+    assert.equal(status.body.data.authenticated, false);
+    assert.equal(status.body.data.csrfToken, undefined);
+    assert.equal(status.headers.get('access-control-allow-credentials'), null);
+  });
+  await check('Protected routes reject a malformed bearer token', async () => {
+    const response = await request('fillups.php', 'GET', undefined, {
+      Authorization: 'Bearer malformed',
+    });
+    assert.equal(response.status, 401);
+  });
+  await check(
+    'Shared account rejects incorrect credentials and issues an access token',
+    async () => {
+      assert.equal(
+        (
+          await request('auth.php', 'POST', {
+            action: 'login',
+            username: 'owner',
+            password: 'wrong',
+          })
+        ).status,
+        401,
+      );
+      const signedIn = await request('auth.php', 'POST', {
+        action: 'login',
+        username: 'owner',
+        password: testPassword,
+      });
+      assert.equal(signedIn.status, 200);
+      assert.equal(signedIn.body.data.authenticated, true);
+      assert.match(signedIn.body.data.accessToken, /^[A-Za-z0-9_-]{43}$/);
+    },
+  );
   const defaults = (await request('settings.php')).body.data;
   const id = randomUUID();
   const fill = {
@@ -371,6 +432,11 @@ try {
       assert.ok(result.body.data.stations.includes('NEIGHBORHOOD PUMP'));
     },
   );
+  await check('Logout revokes access to the shared dataset', async () => {
+    assert.equal((await request('auth.php', 'POST', { action: 'logout' })).status, 200);
+    assert.equal((await request('settings.php')).status, 401);
+    assert.equal((await request('auth.php')).body.data.authenticated, false);
+  });
   mkdirSync('artifacts', { recursive: true });
   writeFileSync(
     'artifacts/api-results.json',
