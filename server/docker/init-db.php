@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 // Idempotent schema setup for the configured database (setup.sql uses IF NOT EXISTS / INSERT IGNORE).
-// Skips the CREATE DATABASE / USE lines: setup.sql includes local CREATE DATABASE / USE statements, which are skipped here.
+// Skips the CREATE DATABASE / USE lines: the hosted database is chosen by GAS_TRACKER_DB_NAME.
 // Run: php /var/www/app/docker/init-db.php
 require_once dirname(__DIR__) . '/api/helpers.php';
 
@@ -17,8 +17,4 @@ if ($sql === false) {
 $sql = preg_replace('/^\s*(CREATE DATABASE|USE)\b[^;]*;/mi', '', $sql);
 $pdo->exec((string) $sql);
 $tables = $pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-echo "Connected to database '{$name}' on " .
-    configuration()['host'] .
-    "\nTables: " .
-    implode(', ', $tables) .
-    "\n";
+echo "Connected to database '{$name}' on " . configuration()['host'] . "\nTables: " . implode(', ', $tables) . "\n";
