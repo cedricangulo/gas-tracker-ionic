@@ -1,5 +1,7 @@
 # Validation results
 
+> **Historical results:** The table records checks performed through 2026-11-06. Follow-up verification from 2026-11-07 is recorded below; use the dated entries when assessing the latest changes.
+
 Automated checks run on 2026-11-06, using local XAMPP PHP 8.2.12/MySQL, Ionic 8.8.19, Angular 20.3.35, and the machine's installed Node runtime.
 
 | Check                           | Result                           | Coverage                                                                                                                                                                      |
@@ -75,3 +77,13 @@ Settings now offers Add, Rename and Archive. Rename requires a connection and pe
 Passed type checking, 46 unique logic tests, the 11 affected Settings component tests, 16 disposable-database API checks, and PHPStan level 9. The retry assertion was corrected and all 19 store tests rerun successfully. New regressions cover automatic refresh after a lost response, restart recovery, same operation IDs, drafts queued by another window, duplicate names including inactive choices, case corrections, stable station IDs and archived fill-ups. The previous full PHP unit suite was not repeated; the new endpoint was exercised through HTTP integration.
 
 Independent review found no remaining important issues after fixes. Tests ran only after implementation and used sequential processes with limited workers. Browser testing and production builds were skipped. No live database records were changed.
+
+### Android offline session follow-up (2026-11-07)
+
+After a prior sign-in, reopening the APK with both Wi-Fi and mobile data disabled returned to the sign-in screen. Startup now retains a cached local session while offline when a previous sign-in marker exists. An online API response that rejects the token still clears the local session and requires sign-in.
+
+Verification after this change: all 8 focused authentication tests passed; `pnpm typecheck` and `pnpm build` passed; `pnpm run android:sync` and `gradlew assembleDebug` completed successfully. The generated APK manifest includes coarse and fine location permissions. Installable debug APK: `android/app/build/outputs/apk/debug/app-debug.apk`. The rebuilt APK has not yet been retested on a device, so offline persistence and reconnect/sync remain pending manual confirmation.
+
+### Fill-up map pin editing (2026-11-07)
+
+The new/edit fill-up form can select a location on a map. When editing a located fill-up, the picker opens at its saved coordinates. The focused location-picker and fill-up form suites passed 14 tests. Manual testing in the local web app confirmed the existing pin can be edited successfully. Automated browser testing was not performed.
