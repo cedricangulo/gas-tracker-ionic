@@ -62,10 +62,13 @@ export class Auth {
 
   async logout(): Promise<void> {
     this.error.set('');
-    await this.api.logout();
-    this.authenticated.set(false);
-    this.localStorage?.removeItem(AUTH_MARKER);
-    await this.router.navigateByUrl('/login');
+    try {
+      await this.api.logout();
+    } finally {
+      this.authenticated.set(false);
+      this.localStorage?.removeItem(AUTH_MARKER);
+      await this.router.navigateByUrl('/login');
+    }
   }
 
   private async startStore(): Promise<void> {

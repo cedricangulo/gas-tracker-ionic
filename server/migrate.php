@@ -30,6 +30,12 @@ function migrate_auth(PDO $pdo): void
         window_started_at DATETIME NOT NULL,
         blocked_until DATETIME NULL
     ) ENGINE=InnoDB");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS auth_tokens (
+        token_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL PRIMARY KEY,
+        expires_at DATETIME NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX by_expiration (expires_at)
+    ) ENGINE=InnoDB");
 }
 
 /** Save a version 1 row backup before applying any DDL. */

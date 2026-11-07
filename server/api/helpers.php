@@ -82,7 +82,7 @@ function cors(): void
         strtolower(server_value('HTTPS')) === 'on' ||
         server_value('REQUEST_SCHEME') === 'https' ||
         server_value('SERVER_PORT') === '443';
-    if ($config['secure_cookies'] && !$https) {
+    if ($config['require_https'] && !$https) {
         respond(426, ['success' => false, 'message' => 'Connect securely to continue.']);
     }
     if ($https) {
@@ -97,7 +97,6 @@ function cors(): void
     if ($origin !== '' && in_array($origin, $allowed, true)) {
         header('Access-Control-Allow-Origin: ' . $origin);
         header('Vary: Origin');
-        header('Access-Control-Allow-Credentials: true');
     }
     if ($origin !== '' && !in_array($origin, $allowed, true)) {
         respond(403, [
@@ -106,75 +105,63 @@ function cors(): void
         ]);
     }
     header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token, X-Requested-With');
+    header('Access-Control-Allow-Headers: Authorization, Content-Type, X-Requested-With');
     if (server_value('REQUEST_METHOD') === 'OPTIONS') {
         http_response_code(204);
         exit();
     }
 }
 
-function start_auth_session(): void
+function bearer_token(): string
 {
-    if (session_status() === PHP_SESSION_ACTIVE) {
-        return;
+    $header = server_value('HTTP_AUTHORIZATION', server_value('REDIRECT_HTTP_AUTHORIZATION'));
+    if (!preg_match('/^Bearer ([A-Za-z0-9_-]{43})$/D', $header, $matches)) {
+        return '';
     }
-    $config = configuration();
-    ini_set('session.use_strict_mode', '1');
-    ini_set('session.use_only_cookies', '1');
-    session_name('gas_tracker_session');
-    session_set_cookie_params([
-        'lifetime' => 0,
-        'path' => '/',
-        'secure' => $config['secure_cookies'],
-        'httponly' => true,
-        'samesite' => $config['secure_cookies'] ? 'None' : 'Lax',
-    ]);
-    if (!session_start()) {
-        throw new RuntimeException('Could not start a secure session.');
+    return $matches[1];
+}
+
+function has_authenticated_token(PDO $pdo): bool
+{
+    $token = bearer_token();
+    if ($token === '') {
+        return false;
+    }
+    $statement = $pdo->prepare(
+        'SELECT 1 FROM auth_tokens WHERE token_hash = ? AND expires_at > UTC_TIMESTAMP()',
+    );
+    $statement->execute([hash('sha256', $token)]);
+    return $statement->fetchColumn() !== false;
+}
+
+function require_authenticated(PDO $pdo): void
+{
+    if (!has_authenticated_token($pdo)) {
+        throw new InputError(401, 'Sign in to continue.');
     }
 }
 
-function csrf_token(): string
+function issue_access_token(PDO $pdo): string
 {
-    start_auth_session();
-    $token = $_SESSION['csrf_token'] ?? null;
-    if (!is_string($token) || strlen($token) < 32) {
-        $token = bin2hex(random_bytes(32));
-        $_SESSION['csrf_token'] = $token;
-    }
+    $token = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+    $hash = hash('sha256', $token);
+    $pdo->prepare('DELETE FROM auth_tokens WHERE expires_at <= UTC_TIMESTAMP()')->execute();
+    $statement = $pdo->prepare(
+        'INSERT INTO auth_tokens (token_hash, expires_at) VALUES (?, DATE_ADD(UTC_TIMESTAMP(), INTERVAL 12 HOUR))',
+    );
+    $statement->execute([$hash]);
     return $token;
 }
 
-function require_csrf(): void
+function revoke_access_token(PDO $pdo): void
 {
-    $expected = csrf_token();
-    $provided = server_value('HTTP_X_CSRF_TOKEN');
-    if ($provided === '' || !hash_equals($expected, $provided)) {
-        throw new InputError(419, 'Refresh the page and try again.');
+    $token = bearer_token();
+    if ($token === '') {
+        return;
     }
-}
-
-function has_authenticated_session(): bool
-{
-    start_auth_session();
-    $expiresAt = $_SESSION['expires_at'] ?? null;
-    if (
-        ($_SESSION['authenticated'] ?? false) !== true ||
-        !is_int($expiresAt) ||
-        $expiresAt <= time()
-    ) {
-        unset($_SESSION['authenticated'], $_SESSION['expires_at']);
-        return false;
-    }
-    $_SESSION['expires_at'] = time() + 43200;
-    return true;
-}
-
-function require_authenticated(): void
-{
-    if (!has_authenticated_session()) {
-        throw new InputError(401, 'Sign in to continue.');
-    }
+    $pdo->prepare('DELETE FROM auth_tokens WHERE token_hash = ?')->execute([
+        hash('sha256', $token),
+    ]);
 }
 
 function login_client_key(): string

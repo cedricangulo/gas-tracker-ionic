@@ -18,24 +18,19 @@ export class ApiError extends Error {
 export class ApiService {
   private readonly http = inject(HttpClient);
   readonly baseUrl = environment.apiBaseUrl.replace(/\/$/, '');
-  private csrfToken = '';
+  private readonly tokenStorage = globalThis.localStorage;
+  private accessToken = this.tokenStorage?.getItem('gas-tracker-access-token') ?? '';
   onUnauthorized: (() => void) | null = null;
-  private async request<T>(
-    method: string,
-    path: string,
-    body?: unknown,
-    retryAfterCsrfRefresh = true,
-  ): Promise<T> {
+  private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
     try {
       const response = await firstValueFrom(
         this.http
           .request<ApiResponse<T>>(method, this.baseUrl + path, {
             body,
-            withCredentials: true,
-            headers:
-              method === 'GET' || !this.csrfToken
-                ? undefined
-                : new HttpHeaders({ 'X-CSRF-Token': this.csrfToken }),
+            withCredentials: false,
+            headers: this.accessToken
+              ? new HttpHeaders({ Authorization: `Bearer ${this.accessToken}` })
+              : undefined,
           })
           .pipe(timeout(12000)),
       );
@@ -45,11 +40,10 @@ export class ApiService {
     } catch (error) {
       if (error instanceof ApiError) throw error;
       if (error instanceof HttpErrorResponse) {
-        if (error.status === 419 && retryAfterCsrfRefresh) {
-          await this.authStatus();
-          return this.request<T>(method, path, body, false);
+        if (error.status === 401 && path !== '/auth.php') {
+          this.setAccessToken('');
+          this.onUnauthorized?.();
         }
-        if (error.status === 401 && path !== '/auth.php') this.onUnauthorized?.();
         const errorBody = error.error as ApiResponse<unknown> | null;
         const details = errorBody?.errors ? Object.values(errorBody.errors).join(' ') : '';
         throw new ApiError(
@@ -72,29 +66,31 @@ export class ApiService {
     return this.request('GET', '/settings.php');
   }
   async authStatus(): Promise<{ authenticated: boolean }> {
-    const response = await this.request<{ authenticated: boolean; csrfToken: string }>(
-      'GET',
-      '/auth.php',
-    );
-    this.csrfToken = response.csrfToken;
-    return { authenticated: response.authenticated };
+    if (!this.accessToken) return { authenticated: false };
+    const response = await this.request<{ authenticated: boolean }>('GET', '/auth.php');
+    if (!response.authenticated) this.setAccessToken('');
+    return response;
   }
   async login(username: string, password: string): Promise<void> {
-    if (!this.csrfToken) await this.authStatus();
-    const response = await this.request<{ authenticated: boolean; csrfToken: string }>(
+    this.setAccessToken('');
+    const response = await this.request<{ authenticated: boolean; accessToken: string }>(
       'POST',
       '/auth.php',
       { action: 'login', username, password },
     );
-    this.csrfToken = response.csrfToken;
+    this.setAccessToken(response.accessToken);
   }
   async logout(): Promise<void> {
-    const response = await this.request<{ authenticated: boolean; csrfToken: string }>(
-      'POST',
-      '/auth.php',
-      { action: 'logout' },
-    );
-    this.csrfToken = response.csrfToken;
+    try {
+      await this.request<{ authenticated: boolean }>('POST', '/auth.php', { action: 'logout' });
+    } finally {
+      this.setAccessToken('');
+    }
+  }
+  private setAccessToken(token: string): void {
+    this.accessToken = token;
+    if (token) this.tokenStorage?.setItem('gas-tracker-access-token', token);
+    else this.tokenStorage?.removeItem('gas-tracker-access-token');
   }
   async renameStation(from: string, to: string, operationId: string): Promise<BikeSettings> {
     try {

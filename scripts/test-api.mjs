@@ -3,14 +3,13 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
-import { readFileSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 
 const php = process.env.PHP_BINARY || 'php';
 const database = 'gas_tracker_test_' + randomUUID().replaceAll('-', '');
 const root = resolve('server');
-const sessionDirectory = resolve('artifacts/php-sessions-' + randomUUID());
 let server;
 let count = 0;
 const results = [];
@@ -45,17 +44,16 @@ try {
   const testPasswordHash = runPhp(
     'echo password_hash(' + JSON.stringify(testPassword) + ', PASSWORD_DEFAULT);',
   );
-  mkdirSync(sessionDirectory, { recursive: true });
   server = spawn(
     php,
-    ['-d', 'session.save_path=' + sessionDirectory, '-S', '127.0.0.1:' + port, '-t', root],
+    ['-S', '127.0.0.1:' + port, '-t', root],
     {
       env: {
         ...process.env,
         GAS_TRACKER_DB: database,
         GAS_TRACKER_ACCOUNT_USERNAME: 'owner',
         GAS_TRACKER_ACCOUNT_PASSWORD_HASH: testPasswordHash,
-        GAS_TRACKER_SECURE_COOKIES: 'false',
+        GAS_TRACKER_REQUIRE_HTTPS: 'false',
       },
       stdio: ['ignore', 'ignore', 'pipe'],
       windowsHide: true,
@@ -77,18 +75,14 @@ try {
     await delay(150);
   }
   assert.ok(ready, 'PHP server did not start: ' + serverErrors);
-  let sessionCookie = '';
-  let csrfToken = '';
+  let accessToken = '';
   async function request(path, method = 'GET', body, extra = {}) {
     const headers = {
       'Content-Type': 'application/json',
       Origin: 'http://localhost:8100',
-      ...(sessionCookie ? { Cookie: sessionCookie } : {}),
+      ...(accessToken ? { Authorization: 'Bearer ' + accessToken } : {}),
       ...extra,
     };
-    if (method !== 'GET' && csrfToken && headers['X-CSRF-Token'] === undefined) {
-      headers['X-CSRF-Token'] = csrfToken;
-    }
     const res = await fetch(base + path, {
       method,
       headers,
@@ -103,30 +97,27 @@ try {
     } catch {
       throw new Error('Non-JSON response: ' + text);
     }
-    const setCookie = res.headers.get('set-cookie');
-    if (setCookie) sessionCookie = setCookie.split(';', 1)[0];
-    if (data?.data?.csrfToken) csrfToken = data.data.csrfToken;
+    if (data?.data?.accessToken) accessToken = data.data.accessToken;
+    if (data?.data?.authenticated === false && method === 'POST') accessToken = '';
     return { status: res.status, body: data, headers: res.headers };
   }
-  await check('API requires login and issues a CSRF token', async () => {
+  await check('API requires a bearer token', async () => {
     assert.equal((await request('settings.php')).status, 401);
     assert.equal((await request('fillups.php')).status, 401);
     const status = await request('auth.php');
     assert.equal(status.status, 200);
     assert.equal(status.body.data.authenticated, false);
-    assert.ok(status.body.data.csrfToken.length >= 32);
-    assert.equal(status.headers.get('access-control-allow-credentials'), 'true');
+    assert.equal(status.body.data.csrfToken, undefined);
+    assert.equal(status.headers.get('access-control-allow-credentials'), null);
   });
-  await check('Mutations reject missing CSRF tokens', async () => {
-    const response = await fetch(base + 'auth.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:8100' },
-      body: JSON.stringify({ action: 'login', username: 'owner', password: testPassword }),
+  await check('Protected routes reject a malformed bearer token', async () => {
+    const response = await request('fillups.php', 'GET', undefined, {
+      Authorization: 'Bearer malformed',
     });
-    assert.equal(response.status, 419);
+    assert.equal(response.status, 401);
   });
   await check(
-    'Shared account rejects incorrect credentials and accepts the configured account',
+    'Shared account rejects incorrect credentials and issues an access token',
     async () => {
       assert.equal(
         (
@@ -145,6 +136,7 @@ try {
       });
       assert.equal(signedIn.status, 200);
       assert.equal(signedIn.body.data.authenticated, true);
+      assert.match(signedIn.body.data.accessToken, /^[A-Za-z0-9_-]{43}$/);
     },
   );
   const defaults = (await request('settings.php')).body.data;
@@ -453,7 +445,6 @@ try {
   console.log(count + ' API checks passed.');
 } finally {
   server?.kill();
-  rmSync(sessionDirectory, { recursive: true, force: true });
   // Only the exact randomly named database created above is eligible for cleanup.
   assert.match(database, /^gas_tracker_test_[a-f0-9]{32}$/);
   runPhp(configCode + '$pdo->exec("DROP DATABASE ' + database + '");');

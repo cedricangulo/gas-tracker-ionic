@@ -1,5 +1,7 @@
 # Validation results
 
+> **Historical results:** This log records checks performed during development through 2026-11-06. Authentication and navigation changes were added afterward. Rerun the relevant checks and update this page before using its totals as final-submission evidence.
+
 Automated checks run on 2026-11-06, using local XAMPP PHP 8.2.12/MySQL, Ionic 8.8.19, Angular 20.3.35, and the machine's installed Node runtime.
 
 | Check                           | Result                           | Coverage                                                                                                                                                                      |

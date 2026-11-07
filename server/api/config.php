@@ -11,7 +11,7 @@ function config_string(array $config, string $key): string
     return $value;
 }
 
-/** @return array{host: string, port: int, database: string, username: string, password: string, allowed_origins: list<string>, account_username: string, account_password_hash: string, secure_cookies: bool} */
+/** @return array{host: string, port: int, database: string, username: string, password: string, allowed_origins: list<string>, account_username: string, account_password_hash: string, require_https: bool} */
 function configuration(): array
 {
     $path = dirname(__DIR__) . '/config.local.php';
@@ -61,14 +61,18 @@ function configuration(): array
     if ($accountPasswordHash === false || $accountPasswordHash === '') {
         $accountPasswordHash = $config['account_password_hash'] ?? '';
     }
-    $secureCookies = getenv('GAS_TRACKER_SECURE_COOKIES');
-    if ($secureCookies === false || $secureCookies === '') {
-        $secureCookies = $config['secure_cookies'] ?? false;
-    } else {
-        $secureCookies = filter_var($secureCookies, FILTER_VALIDATE_BOOL);
+    $requireHttps = getenv('GAS_TRACKER_REQUIRE_HTTPS');
+    if ($requireHttps === false || $requireHttps === '') {
+        // Backward compatibility for Railway services configured before token auth.
+        $requireHttps = getenv('GAS_TRACKER_SECURE_COOKIES');
     }
-    if (!is_bool($secureCookies)) {
-        throw new RuntimeException('Invalid secure cookie configuration.');
+    if ($requireHttps === false || $requireHttps === '') {
+        $requireHttps = $config['require_https'] ?? ($config['secure_cookies'] ?? false);
+    } else {
+        $requireHttps = filter_var($requireHttps, FILTER_VALIDATE_BOOL);
+    }
+    if (!is_bool($requireHttps)) {
+        throw new RuntimeException('Invalid HTTPS configuration.');
     }
     return [
         'host' => config_string($config, 'host'),
@@ -79,7 +83,7 @@ function configuration(): array
         'allowed_origins' => $allowed,
         'account_username' => config_string(['value' => $accountUsername], 'value'),
         'account_password_hash' => config_string(['value' => $accountPasswordHash], 'value'),
-        'secure_cookies' => $secureCookies,
+        'require_https' => $requireHttps,
     ];
 }
 

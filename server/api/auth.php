@@ -6,29 +6,25 @@ $pdo = null;
 try {
     $method = server_value('REQUEST_METHOD');
     if ($method === 'GET') {
-        $authenticated = has_authenticated_session();
+        $pdo = database();
+        $authenticated = has_authenticated_token($pdo);
         respond(200, [
             'success' => true,
-            'data' => ['authenticated' => $authenticated, 'csrfToken' => csrf_token()],
+            'data' => ['authenticated' => $authenticated],
         ]);
     }
     if ($method !== 'POST') {
         header('Allow: GET, POST, OPTIONS');
         throw new InputError(405, 'This action is not available.');
     }
-    start_auth_session();
-    require_csrf();
     $input = body();
     $action = $input['action'] ?? null;
     if ($action === 'logout') {
-        $_SESSION = [];
-        if (!session_regenerate_id(true)) {
-            throw new RuntimeException('Could not end the session.');
-        }
-        $token = csrf_token();
+        $pdo = database();
+        revoke_access_token($pdo);
         respond(200, [
             'success' => true,
-            'data' => ['authenticated' => false, 'csrfToken' => $token],
+            'data' => ['authenticated' => false],
         ]);
     }
     if ($action !== 'login') {
@@ -54,15 +50,10 @@ try {
         throw new InputError(401, 'The username or password is incorrect.');
     }
     record_login_attempt($pdo, $clientKey, true);
-    if (!session_regenerate_id(true)) {
-        throw new RuntimeException('Could not secure the session.');
-    }
-    $_SESSION['authenticated'] = true;
-    $_SESSION['expires_at'] = time() + 43200;
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    $token = issue_access_token($pdo);
     respond(200, [
         'success' => true,
-        'data' => ['authenticated' => true, 'csrfToken' => $_SESSION['csrf_token']],
+        'data' => ['authenticated' => true, 'accessToken' => $token],
     ]);
 } catch (Throwable $error) {
     api_error($error, $pdo);

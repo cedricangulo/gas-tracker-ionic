@@ -4,8 +4,8 @@
 
 - Ionic 8 + Angular 20 standalone; Capacitor 7; pnpm; recommended Node 24.
 - User requires Ionic CLI scaffolding and generators wherever supported.
-- XAMPP Apache + MySQL; repository in D:/xampp/htdocs/gas-tracker-mobile.
-- Personal single-bike dataset. Six prompt screens; no accounts/import/export.
+- XAMPP Apache + MySQL; repository is placed under the XAMPP web root.
+- Single-bike dataset shared through one account. Six core app screens plus sign-in; no role system or public registration.
 - Main gas-tracker reference unchanged.
 - Per-page/component specs requested and generated through Ionic CLI.
 - No real-browser testing; component unit tests use Node/jsdom.
@@ -26,14 +26,14 @@
 - PHP validation: 16 tests, 20 assertions pass.
 - PHPStan: level 9, no errors.
 - Isolated real PHP/MySQL API tests: 13 checks pass.
-- Ionic CLI dev server: http://127.0.0.1:8100, HTTP 200.
+- Ionic CLI dev server returned HTTP 200 during validation.
 - Apache API endpoints: HTTP 200. Private config, SQL, helpers and Git metadata: HTTP 403.
 - Independent read-only review confirms sync ordering fixes; no remaining critical/important issue found in reviewed functions.
 - Native packaging and visual/device verification remain deferred as agreed.
 
 ## Next Step
 
-User: reopen the relocated repository and review the running app. Follow README.md for future startup and later APK packaging.
+User: reopen the relocated repository and review the running app. Follow `../README.md` for setup and later APK packaging.
 
 ## Resolved setup issues
 

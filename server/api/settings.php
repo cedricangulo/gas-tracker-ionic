@@ -4,16 +4,13 @@ require_once __DIR__ . '/helpers.php';
 cors();
 $pdo = null;
 try {
-    require_authenticated();
     $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
     if (!in_array($method, ['GET', 'POST'], true)) {
         header('Allow: GET, POST, OPTIONS');
         throw new InputError(405, 'This action is not available.');
     }
-    if ($method !== 'GET') {
-        require_csrf();
-    }
     $pdo = database();
+    require_authenticated($pdo);
     if ($method === 'GET') {
         respond(200, ['success' => true, 'data' => get_settings($pdo)]);
     }

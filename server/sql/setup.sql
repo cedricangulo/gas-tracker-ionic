@@ -72,3 +72,10 @@ CREATE TABLE IF NOT EXISTS auth_login_attempts (
     window_started_at DATETIME NOT NULL,
     blocked_until DATETIME NULL
 ) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS auth_tokens (
+    token_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL PRIMARY KEY,
+    expires_at DATETIME NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX by_expiration (expires_at)
+) ENGINE=InnoDB;
