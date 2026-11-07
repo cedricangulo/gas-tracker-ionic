@@ -1,0 +1,42 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button aria-label="Cancel location selection" (click)="cancel()">
+        <ion-icon slot="icon-only" name="close-outline" aria-hidden="true" />
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Choose location</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="picker-map-frame">
+    <div
+      #mapCanvas
+      class="picker-map"
+      role="application"
+      aria-label="Map. Tap where the fill-up happened to place a pin."
+      tabindex="0"
+    ></div>
+    @if (tileError()) {
+      <p class="map-error" role="status">
+        Map tiles could not load. Check your internet connection; your fill-up is still safe.
+      </p>
+    }
+  </div>
+</ion-content>
+
+<ion-footer>
+  <div class="picker-footer">
+    @if (selected(); as point) {
+      <p class="coordinates mono" aria-live="polite">
+        {{ point.latitude | number: '1.5-5' }}, {{ point.longitude | number: '1.5-5' }}
+      </p>
+    } @else {
+      <p class="picker-help">Move the map to the right place and tap to pin it.</p>
+    }
+    <button class="button wide" type="button" [disabled]="!selected()" (click)="confirm()">
+      <ion-icon name="checkmark-outline" aria-hidden="true" />Use this spot
+    </button>
+  </div>
+</ion-footer>

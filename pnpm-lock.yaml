@@ -190,6 +190,9 @@ importers:
       '@angular/service-worker':
         specifier: 20.3.35
         version: 20.3.35(@angular/core@20.3.35(@angular/compiler@20.3.35)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
+      '@capacitor/android':
+        specifier: 7.6.10
+        version: 7.6.10(@capacitor/core@7.6.10)
       '@capacitor/core':
         specifier: 7.6.10
         version: 7.6.10
@@ -565,6 +568,11 @@ packages:
   '@babel/types@7.29.11':
     resolution: {integrity: sha512-WCsemW40Cpc6gouC1SrY6PBaZ+oLRlEVY9XBvZBI7il/HyUrb2nJ505wE1MHEFyDZNnrWDEuy4jL50WVHfTTSQ==}
     engines: {node: '>=6.9.0'}
+
+  '@capacitor/android@7.6.10':
+    resolution: {integrity: sha512-94DBImYZyDA9RnO5ks3MI/j6rRFs1uK5DR2ft/rBIsvsltDT4w1CSuM8U7vKmKEGRmAfP6vH/woJkBF69fZa4A==}
+    peerDependencies:
+      '@capacitor/core': ^7.6.0
 
   '@capacitor/cli@7.6.10':
     resolution: {integrity: sha512-8S0h44+339hCJyDw0EWqKz4ivR08tzSY35WzSs49pQ4gNOrGiyKpBUaZc08zlJgvN8yfzMY1pi8QfKDsSn1eHg==}
@@ -4417,6 +4425,10 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.29.13
       '@babel/helper-validator-identifier': 7.29.7
+
+  '@capacitor/android@7.6.10(@capacitor/core@7.6.10)':
+    dependencies:
+      '@capacitor/core': 7.6.10
 
   '@capacitor/cli@7.6.10(supports-color@7.2.0)':
     dependencies:

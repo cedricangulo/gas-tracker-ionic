@@ -14,6 +14,33 @@
 @import '@fontsource-variable/geist-mono/index.css';
 @import 'leaflet/dist/leaflet.css';
 
+.fillup-location-marker {
+  border: 0;
+  background: transparent;
+}
+.fillup-location-marker span {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  background: #7a5224;
+  box-shadow: 0 2px 8px #0005;
+  transform: rotate(-45deg);
+}
+.fillup-location-marker span::after {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  content: '';
+}
+
 * {
   box-sizing: border-box;
 }
@@ -52,6 +79,13 @@ button:disabled {
 }
 ion-content {
   --background: var(--ion-background-color);
+}
+ion-modal.location-picker-modal {
+  --width: 100%;
+  --height: 100%;
+  --max-width: none;
+  --max-height: none;
+  --border-radius: 0;
 }
 ion-content::part(scroll) {
   overscroll-behavior-y: contain;
@@ -107,8 +141,13 @@ ion-tab-button {
   --padding-start: 3px;
   --padding-end: 3px;
 }
-ion-tab-button.tab-selected {
+ion-tab-button.tab-selected:not(.route-active) {
+  background: transparent;
+  --color: var(--muted);
+}
+ion-tab-button.route-active {
   background: var(--soft);
+  --color: var(--accent);
 }
 ion-tab-button ion-icon {
   font-size: 21px;

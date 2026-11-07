@@ -1,13 +1,17 @@
-import { Component, inject, signal, computed, effect } from '@angular/core';
+import { Component, inject, signal, computed, effect, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { IonContent, IonIcon, AlertController } from '@ionic/angular/standalone';
+import { IonContent, IonIcon, IonModal, AlertController } from '@ionic/angular/standalone';
 import { TrackerStore } from '../../services/tracker-store';
 import { GeoService } from '../../services/geo';
 import { Fillup } from '../../models/tracker';
 import { isoWithOffset, localDateTime } from '../../models/math';
 import { SyncBannerComponent } from '../../components/sync-banner/sync-banner.component';
+import {
+  FillupLocation,
+  LocationPickerComponent,
+} from '../../components/location-picker/location-picker.component';
 @Component({
   selector: 'app-fillup-form',
   standalone: true,
@@ -19,7 +23,9 @@ import { SyncBannerComponent } from '../../components/sync-banner/sync-banner.co
     RouterLink,
     IonContent,
     IonIcon,
+    IonModal,
     SyncBannerComponent,
+    LocationPickerComponent,
   ],
 })
 export class FillupFormPage {
@@ -34,6 +40,8 @@ export class FillupFormPage {
   readonly busy = signal(false);
   readonly locating = signal(false);
   readonly location = signal<{ latitude: number; longitude: number } | null>(null);
+  readonly locationPickerOpen = signal(false);
+  @ViewChild(LocationPickerComponent) private locationPicker?: LocationPickerComponent;
   readonly editing = signal(false);
   readonly missing = signal(false);
   private readonly activeId = signal('new');
@@ -162,6 +170,28 @@ export class FillupFormPage {
     } finally {
       this.locating.set(false);
     }
+  }
+  openLocationPicker(): void {
+    this.locationError.set('');
+    this.locationPickerOpen.set(true);
+  }
+  selectManualLocation(point: FillupLocation): void {
+    this.location.set(point);
+    this.locationError.set('');
+    this.form.markAsDirty();
+    this.locationPickerOpen.set(false);
+  }
+  closeLocationPicker(): void {
+    this.locationPickerOpen.set(false);
+  }
+  onLocationPickerDismissed(): void {
+    this.closeLocationPicker();
+  }
+  onLocationPickerPresented(): void {
+    const picker = this.locationPicker;
+    if (!picker) return;
+    picker.invalidateSize();
+    picker.setInitialLocation(this.location());
   }
   async addChoice(kind: 'stations' | 'grades'): Promise<void> {
     const alert = await this.alerts.create({

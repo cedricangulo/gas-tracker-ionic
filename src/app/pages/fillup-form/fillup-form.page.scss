@@ -88,6 +88,10 @@
   padding: 13px 0;
   color: var(--good);
 }
+.location-actions {
+  display: grid;
+  gap: 8px;
+}
 .location-confirm div {
   flex: 1;
   min-width: 0;
