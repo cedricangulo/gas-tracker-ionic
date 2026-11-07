@@ -6,6 +6,17 @@ import { SettingsPage } from './settings.page';
 import { TrackerStore } from '../../services/tracker-store';
 import { TestStore } from '../../testing/context.test-support';
 describe('SettingsPage', () => {
+  it('shows sign out as a full-width destructive action outside the cards', () => {
+    const fixture = TestBed.createComponent(SettingsPage);
+    fixture.detectChanges();
+    const action = fixture.nativeElement.querySelector('.settings-account-action');
+    const button = action.querySelector('button');
+    expect(action.closest('main.page')).not.toBeNull();
+    expect(action.closest('.card')).toBeNull();
+    expect(button.classList.contains('wide')).toBe(true);
+    expect(button.classList.contains('destructive')).toBe(true);
+  });
+
   it('updates a pristine form when the initial server settings arrive', () => {
     const store = TestBed.inject(TrackerStore) as unknown as TestStore;
     const fixture = TestBed.createComponent(SettingsPage);

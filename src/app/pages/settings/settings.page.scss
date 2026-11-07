@@ -66,6 +66,19 @@
 .stations {
   margin-top: 18px;
 }
+.settings-account-action {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  margin-top: 18px;
+}
+.settings-account-action .destructive {
+  background: var(--danger);
+  color: #fff;
+}
+.settings-account-action .form-error {
+  width: 100%;
+}
 .stations .section-heading {
   align-items: center;
   margin-bottom: 8px;
