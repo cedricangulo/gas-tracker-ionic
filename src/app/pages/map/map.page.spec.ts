@@ -117,12 +117,15 @@ describe('MapPage', () => {
 
   it('drives grouped markers, grade-filtered heat points, list selection and density toggling', async () => {
     vi.spyOn(MapPage.prototype, 'ngAfterViewInit').mockRestore();
+    let mapSize = { x: 0, y: 0 };
+    let resize: ResizeObserverCallback | undefined;
     const map = {
       setView: vi.fn().mockReturnThis(),
       fitBounds: vi.fn().mockReturnThis(),
       removeLayer: vi.fn(),
       invalidateSize: vi.fn(),
       remove: vi.fn(),
+      getSize: vi.fn(() => mapSize),
     };
     const group = { addTo: vi.fn().mockReturnThis(), clearLayers: vi.fn() };
     vi.spyOn(L, 'map').mockReturnValue(map as unknown as L.Map);
@@ -146,6 +149,9 @@ describe('MapPage', () => {
     vi.stubGlobal(
       'ResizeObserver',
       class {
+        constructor(callback: ResizeObserverCallback) {
+          resize = callback;
+        }
         observe(): void {}
         disconnect(): void {}
       },
@@ -165,6 +171,12 @@ describe('MapPage', () => {
     ]);
     const fixture = TestBed.createComponent(MapPage);
     fixture.detectChanges();
+    expect(heat).not.toHaveBeenCalled();
+    const canvas = fixture.nativeElement.querySelector('.map-canvas') as HTMLElement;
+    Object.defineProperty(canvas, 'clientWidth', { configurable: true, value: 640 });
+    Object.defineProperty(canvas, 'clientHeight', { configurable: true, value: 320 });
+    mapSize = { x: 640, y: 320 };
+    resize?.([], {} as ResizeObserver);
     await fixture.whenStable();
     fixture.detectChanges();
     expect(fixture.componentInstance.stations()).toHaveLength(2);

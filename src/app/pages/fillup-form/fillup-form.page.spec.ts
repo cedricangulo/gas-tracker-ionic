@@ -90,6 +90,66 @@ describe('FillupFormPage', () => {
     );
     expect(TestBed.inject(GeoService).haptic).toHaveBeenCalledOnce();
   });
+  it('saves a manually pinned location without requesting device location', async () => {
+    const store = TestBed.inject(TrackerStore) as unknown as TestStore;
+    vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    const geo = TestBed.inject(GeoService);
+    const fixture = TestBed.createComponent(FillupFormPage);
+    fixture.detectChanges();
+    const page = fixture.componentInstance;
+
+    page.openLocationPicker();
+    expect(page.locationPickerOpen()).toBe(true);
+    page.selectManualLocation({ latitude: 14.6042, longitude: 120.9822 });
+    expect(page.locationPickerOpen()).toBe(false);
+    expect(page.form.dirty).toBe(true);
+
+    await page.save();
+
+    expect(store.saveFill).toHaveBeenCalledWith(
+      expect.objectContaining({ latitude: 14.6042, longitude: 120.9822 }),
+      false,
+    );
+    expect(geo.current).not.toHaveBeenCalled();
+  });
+  it('keeps the current location when the map picker is cancelled', () => {
+    const fixture = TestBed.createComponent(FillupFormPage);
+    fixture.detectChanges();
+    const page = fixture.componentInstance;
+    const current = { latitude: 14.5, longitude: 121 };
+    page.location.set(current);
+
+    page.openLocationPicker();
+    page.closeLocationPicker();
+
+    expect(page.location()).toBe(current);
+    expect(page.locationPickerOpen()).toBe(false);
+  });
+  it('applies saved coordinates after the picker modal is presented', () => {
+    const savedFill = { ...exampleFill, latitude: 14.5995, longitude: 120.9842 };
+    const store = TestBed.inject(TrackerStore) as unknown as TestStore;
+    store.fills.set([savedFill]);
+    Object.defineProperty(TestBed.inject(ActivatedRoute).snapshot, 'paramMap', {
+      value: convertToParamMap({ id: savedFill.id }),
+      configurable: true,
+    });
+    const fixture = TestBed.createComponent(FillupFormPage);
+    const page = fixture.componentInstance;
+    page.ionViewWillEnter();
+    const setInitialLocation = vi.fn();
+    const invalidateSize = vi.fn();
+    Object.defineProperty(page, 'locationPicker', {
+      value: { setInitialLocation, invalidateSize, discardSelection: vi.fn() },
+      configurable: true,
+    });
+
+    page.onLocationPickerPresented();
+
+    expect(invalidateSize).toHaveBeenCalledOnce();
+    expect(setInitialLocation).toHaveBeenCalledWith({ latitude: 14.5995, longitude: 120.9842 });
+    page.onLocationPickerDismissed();
+    expect(page.locationPickerOpen()).toBe(false);
+  });
   it('recovers a directly linked entry when the initial server read finishes', () => {
     const store = TestBed.inject(TrackerStore) as unknown as TestStore;
     Object.defineProperty(TestBed.inject(ActivatedRoute).snapshot, 'paramMap', {

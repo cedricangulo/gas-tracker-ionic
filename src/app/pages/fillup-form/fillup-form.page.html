@@ -177,25 +177,30 @@
           <div class="section-heading">
             <h2>Location</h2>
           </div>
-          <button
-            type="button"
-            class="button secondary wide"
-            (click)="captureLocation()"
-            [disabled]="locating()"
-          >
-            <ion-icon name="location-outline" aria-hidden="true" />{{
-              locating()
-                ? 'Finding your location…'
-                : location()
-                  ? 'Update location'
-                  : 'Use my location'
-            }}
-          </button>
+          <div class="location-actions">
+            <button
+              type="button"
+              class="button secondary wide"
+              (click)="captureLocation()"
+              [disabled]="locating()"
+            >
+              <ion-icon name="location-outline" aria-hidden="true" />{{
+                locating()
+                  ? 'Finding your location…'
+                  : location()
+                    ? 'Update location'
+                    : 'Use my location'
+              }}
+            </button>
+            <button type="button" class="button secondary wide" (click)="openLocationPicker()">
+              <ion-icon name="map-outline" aria-hidden="true" />Choose on map
+            </button>
+          </div>
           @if (location(); as coordinates) {
             <div class="location-confirm">
               <ion-icon name="checkmark-outline" aria-hidden="true" />
               <div>
-                <strong>Location captured</strong
+                <strong>Location selected</strong
                 ><span class="mono"
                   >{{ coordinates.latitude | number: '1.5-5' }},
                   {{ coordinates.longitude | number: '1.5-5' }}</span
@@ -226,3 +231,18 @@
     }
   </main></ion-content
 >
+
+<ion-modal
+  [isOpen]="locationPickerOpen()"
+  cssClass="location-picker-modal"
+  [backdropDismiss]="false"
+  (didPresent)="onLocationPickerPresented()"
+  (didDismiss)="onLocationPickerDismissed()"
+>
+  <ng-template>
+    <app-location-picker
+      (locationSelected)="selectManualLocation($event)"
+      (cancelled)="closeLocationPicker()"
+    />
+  </ng-template>
+</ion-modal>

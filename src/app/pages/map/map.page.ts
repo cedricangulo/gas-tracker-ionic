@@ -141,14 +141,20 @@ export class MapPage implements AfterViewInit, OnDestroy {
       }).addTo(this.map);
       tiles.on('tileerror', () => this.zone.run(() => this.tileError.set(true)));
       this.markers = L.layerGroup().addTo(this.map);
-      this.resizeObserver = new ResizeObserver(() => this.map?.invalidateSize());
+      this.resizeObserver = new ResizeObserver(() => this.refreshMapLayout());
       this.resizeObserver.observe(this.mapCanvas.nativeElement);
       this.draw();
     });
   }
   async ionViewDidEnter(): Promise<void> {
-    this.map?.invalidateSize();
     await this.content?.scrollToPoint(undefined, this.listState.mapScrollTop, 0);
+    requestAnimationFrame(() => this.refreshMapLayout());
+  }
+  private refreshMapLayout(): void {
+    const canvas = this.mapCanvas.nativeElement;
+    if (!canvas.isConnected || canvas.clientWidth === 0 || canvas.clientHeight === 0) return;
+    this.map?.invalidateSize({ pan: false });
+    this.draw();
   }
   private popup(station: StationComparison): HTMLElement {
     const container = document.createElement('div');
@@ -182,6 +188,8 @@ export class MapPage implements AfterViewInit, OnDestroy {
   private draw(): void {
     if (!this.map || !this.markers) return;
     const map = this.map;
+    const size = map.getSize();
+    if (size.x === 0 || size.y === 0) return;
     this.markers.clearLayers();
     this.stationMarkers.clear();
     if (this.heatLayer) {
