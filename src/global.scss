@@ -107,8 +107,13 @@ ion-tab-button {
   --padding-start: 3px;
   --padding-end: 3px;
 }
-ion-tab-button.tab-selected {
+ion-tab-button.tab-selected:not(.route-active) {
+  background: transparent;
+  --color: var(--muted);
+}
+ion-tab-button.route-active {
   background: var(--soft);
+  --color: var(--accent);
 }
 ion-tab-button ion-icon {
   font-size: 21px;
