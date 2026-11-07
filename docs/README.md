@@ -97,7 +97,7 @@ The database stores bike configuration as scalar settings columns. Selectable st
 
 Defaults: Honda Click 125i V4, 5.5 L tank, six bars above E, 1.2 L low-fuel anchor, 50 km/L WMTC.
 
-- Liters per bar = `(tank capacity âˆ’ low-fuel anchor) / gauge segments`.
+- Liters per bar = `(tank capacity − low-fuel anchor) / gauge segments`.
 - Gauge readings describe fuel **after** filling. E is the configured low-fuel anchor, not an empty tank.
 - Tank-to-tank efficiency uses distance between full fills divided by purchases after the opening fill, including partial fills and the closing fill.
 - Home prefers a rolling average of the latest five measurable tank intervals; otherwise it shows a labeled gauge estimate.
@@ -111,7 +111,7 @@ Defaults: Honda Click 125i V4, 5.5 L tank, six bars above E, 1.2 L low-fuel anch
 
 Ionic Storage uses IndexedDB for the snapshot and pending operations. Saves are persisted on this device before synchronization. Opening the app, refreshing Home/Log, reconnecting, or returning to the app triggers sync.
 
-After signing in successfully on this installation, the app can reopen from its cached session and data while the device is offline. Changes made offline stay queued on the device and sync when connectivity returns. If the API can be reached and rejects the saved token, sign in again; signing out clears offline access. The offline startup behavior has automated coverage, but the rebuilt APK still needs a device retest.
+After signing in successfully on this installation, the app can reopen from its cached session and data while the device is offline. Changes made offline stay queued on the device and sync when connectivity returns. If the API can be reached and rejects the saved token, sign in again; signing out clears offline access. The offline startup behavior has automated coverage and was manually checked on the installed APK.
 
 A failed validation remains visible and can be corrected by editing the entry. Retry reattempts pending operations. Deleting a rejected entry does not block later changes. On browsers with Web Locks, both snapshot updates and complete sync flights are serialized across tabs/windows; BroadcastChannel shares local updates. Use one window on older browsers without Web Locks.
 
@@ -150,9 +150,11 @@ Preview the production build with `pnpm preview` at `http://127.0.0.1:4173` to u
 
 ## Android APK
 
-An Android APK has been built and installed for manual testing. Generated Android project files and APK output are ignored by Git, so regenerate them locally when needed. Geolocation and best-effort haptics use official Capacitor plugins.
+The APK was built from the command line using Capacitor and the Gradle wrapper; Android Studio was not used. This kept the build lighter on the developer's laptop and lets groupmates test by installing the prepared APK instead of configuring a local Android build. The generated Android project and APK output are ignored by Git, so the developer can rebuild the APK when needed. Geolocation and best-effort haptics use official Capacitor plugins.
 
-With the compatible Android SDK and JDK installed, generate or refresh the Android project and build a debug APK:
+Download the installable APK for this beta from [GitHub Release v1.0.0-beta.1](https://github.com/cedricangulo/gas-tracker-ionic/releases/download/v1.0.0-beta.1/gas-tracker-mobile-debug.apk). This is a debug build intended for course testing; Android may ask you to allow installation from your browser or file manager.
+
+For a local build, install Node.js and pnpm as described above, JDK 21, and Android SDK Platform 35 with its build tools. Android Studio is optional; the Android command-line SDK tools are sufficient. From the repository root, build the web assets, sync the Capacitor project, then run Gradle:
 
 ```powershell
 # Run only when creating the Android project for the first time.
@@ -164,11 +166,11 @@ cd android
 cd ..
 ```
 
-`android:sync` keeps the required coarse and precise location permissions in the generated Android manifest. Tap **My location** on the map to request permission and center the map on the device. A phone's `localhost` is the phone itself: use a reachable HTTPS API URL in the production environment. Local HTTP may need development-only cleartext configuration.
+If the `android` project directory has not been created yet, generate it once with `pnpm exec cap add android` before building. The debug APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`; it can be copied to a device for installation or installed from a connected device with `adb install -r android/app/build/outputs/apk/debug/app-debug.apk`. This is a debug build for testing; publishing requires a separately signed release build. `android:sync` keeps the required coarse and precise location permissions in the generated Android manifest. Tap **My location** on the map to request permission and center the map on the device. A phone's `localhost` is the phone itself: use a reachable HTTPS API URL in the production environment. Local HTTP may need development-only cleartext configuration.
 
 For iOS later, install `@capacitor/ios@7`, add the platform on macOS, set location usage descriptions in Info.plist, and sync/open using Capacitor.
 
-The course's installable APK, 3â€“5 page report, and 8â€“12 minute recording remain separate submission steps. Suggested code snippets to explain: Angular HttpClient in `services/api.ts`, geolocation in `services/geo.ts`, and atomic offline mutations in `services/tracker-store.ts`.
+The course's installable APK, 3–5 page report, and 8–12 minute recording remain separate submission steps. Suggested code snippets to explain: Angular HttpClient in `services/api.ts`, geolocation in `services/geo.ts`, and atomic offline mutations in `services/tracker-store.ts`.
 
 ## Vehicle Compatibility Notice
 
