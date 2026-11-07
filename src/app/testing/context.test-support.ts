@@ -62,6 +62,7 @@ export function createTestStore() {
       store.appearance.set(value);
     }),
     sync: vi.fn(async () => undefined),
+    init: vi.fn(async () => undefined),
     retry: vi.fn(async () => undefined),
   };
   return store;

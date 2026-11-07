@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonContent, IonIcon, AlertController } from '@ionic/angular/standalone';
 import { TrackerStore } from '../../services/tracker-store';
+import { Auth } from '../../services/auth';
 import { GeoService } from '../../services/geo';
 import { ApiError } from '../../services/api';
 import { Appearance } from '../../models/tracker';
@@ -16,6 +17,8 @@ import { SyncBannerComponent } from '../../components/sync-banner/sync-banner.co
 })
 export class SettingsPage {
   readonly store = inject(TrackerStore);
+  readonly auth = inject(Auth);
+  readonly signingOut = signal(false);
   private readonly fb = inject(FormBuilder);
   private readonly geo = inject(GeoService);
   private readonly alerts = inject(AlertController);
@@ -48,6 +51,19 @@ export class SettingsPage {
   }
   ionViewWillEnter(): void {
     if (!this.form.dirty) this.form.patchValue(this.store.settings());
+  }
+  async signOut(): Promise<void> {
+    if (this.signingOut()) return;
+    this.signingOut.set(true);
+    try {
+      await this.auth.logout();
+    } catch (error) {
+      this.auth.error.set(
+        error instanceof Error ? error.message : 'Could not sign out. Try again.',
+      );
+    } finally {
+      this.signingOut.set(false);
+    }
   }
   get litersPerBar(): number {
     const v = this.form.getRawValue();

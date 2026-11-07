@@ -22,6 +22,16 @@ function migration_constraint_exists(PDO $pdo, string $name): bool
     return (int) $stmt->fetchColumn() > 0;
 }
 
+function migrate_auth(PDO $pdo): void
+{
+    $pdo->exec("CREATE TABLE IF NOT EXISTS auth_login_attempts (
+        client_key CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL PRIMARY KEY,
+        attempts TINYINT UNSIGNED NOT NULL DEFAULT 0,
+        window_started_at DATETIME NOT NULL,
+        blocked_until DATETIME NULL
+    ) ENGINE=InnoDB");
+}
+
 /** Save a version 1 row backup before applying any DDL. */
 function migration_backup_legacy(PDO $pdo, string $directory): string
 {
@@ -275,6 +285,7 @@ if (
     try {
         $pdo = database();
         $backup = migrate_normalize($pdo, dirname(__DIR__) . '/artifacts');
+        migrate_auth($pdo);
         echo $backup === null
             ? "Database is already normalized.\n"
             : "Database normalized. Row backup: $backup\n";

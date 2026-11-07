@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost/gas-tracker-mobile/server/api',
+  apiBaseUrl: 'http://127.0.0.1/gas-tracker-mobile/server/api',
 };

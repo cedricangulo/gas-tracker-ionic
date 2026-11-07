@@ -8,6 +8,11 @@ return [
     'database' => 'gas_tracker',
     'username' => 'root',
     'password' => '',
+    // Set one shared account and a password_hash(); never store the plain password here.
+    'account_username' => 'owner',
+    'account_password_hash' => '',
+    // Set true on the hosted HTTPS site. Local XAMPP defaults to false.
+    'secure_cookies' => false,
     'allowed_origins' => [
         'http://localhost:8100',
         'http://127.0.0.1:8100',

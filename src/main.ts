@@ -31,7 +31,7 @@ import {
 } from 'ionicons/icons';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
-import { TrackerStore } from './app/services/tracker-store';
+import { Auth } from './app/services/auth';
 
 addIcons({
   homeOutline,
@@ -66,7 +66,7 @@ bootstrapApplication(AppComponent, {
     importProvidersFrom(
       IonicStorageModule.forRoot({ name: 'gas-tracker', driverOrder: ['asyncStorage'] }),
     ),
-    provideAppInitializer(() => inject(TrackerStore).init()),
+    provideAppInitializer(() => inject(Auth).init()),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:3000',

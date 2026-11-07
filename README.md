@@ -2,7 +2,7 @@
 
 An Ionic 8 + Angular 20 application for a personal motorcycle fuel log, with a framework-free PHP/MySQL backend hosted by local XAMPP.
 
-The app includes Home, Charts, Log, Settings, create/edit fill-ups, and a Leaflet map with a density heatmap. It follows the design and fuel-calculation behavior of the main Gas Tracker project. No login or existing personal-data migration is included.
+The app includes Home, Charts, Log, Settings, create/edit fill-ups, and a Leaflet map with a density heatmap. It follows the design and fuel-calculation behavior of the main Gas Tracker project. One shared account protects the shared dataset; all signed-in classmates use the same records.
 
 ## Open this project
 
@@ -21,7 +21,7 @@ Open your project folder in your editor. The server directory is part of this re
 3. For a fresh database, import `server/sql/setup.sql`. It creates the normalized `gas_tracker` schema and default choices. Re-importing does not erase existing records.
 4. For an existing pre-normalization database, first export a full SQL backup in phpMyAdmin or with `mysqldump`. Close the app or stop sync while migrating, then run `php server/migrate.php` from the repository root. The CLI migration also writes a row-level restore backup under ignored `artifacts/` before altering tables. It can be rerun after a partial DDL failure.
 5. Optionally copy `server/config.example.php` to `server/config.local.php` and set your local connection values. A standard fresh XAMPP installation uses host `127.0.0.1`, port `3306`, user `root`, and an empty password. The local configuration is ignored by Git.
-6. Check the API at `http://localhost/gas-tracker-mobile/server/api/settings.php`.
+6. Set up the shared account as described in **Account setup**, then open the app and sign in.
 
 The PHP runtime needs PDO MySQL; XAMPP's bundled PHP 8.2 works. Composer is **only needed for backend development checks**, not to run the API.
 
@@ -56,9 +56,9 @@ Set `apiBaseUrl` in the generated environment files:
 - `src/environments/environment.prod.ts`: production build.
 - `src/environments/environment.ts`: base environment.
 
-Default: `http://localhost/gas-tracker-mobile/server/api`.
+The local environment points to XAMPP at `http://127.0.0.1/gas-tracker-mobile/server/api`; open Ionic at `http://127.0.0.1:8100` so the session cookie stays same-site. The production and base environments use the same-origin path `/server/api`.
 
-If the frontend origin changes, add its exact origin to `allowed_origins` in the PHP configuration. The API requires `application/json` for mutations and rejects browser mutations from untrusted origins.
+If the frontend origin changes, add its exact origin to `allowed_origins` in the PHP configuration. The API requires `application/json`, an authenticated session, and a CSRF token for mutations. Browser requests must come from an explicitly allowed origin. The production build assumes the frontend and `/server/api` are hosted under the same HTTPS origin.
 
 | Method | Endpoint                | Operation                                    |
 | ------ | ----------------------- | -------------------------------------------- |
@@ -71,7 +71,21 @@ If the frontend origin changes, add its exact origin to `allowed_origins` in the
 
 Responses use the lecture-style `{ success, data?, message?, errors? }` envelope. Mutations include an `operationId` UUID; the frontend supplies it automatically. Successful mutation receipts are committed in the same MySQL transaction as the data change, making lost-response retries safe.
 
-This is a local, single-dataset application without authentication. Public hosting and multi-account access are outside this delivery.
+## Account setup
+
+There is one shared sign-in for the group and no public registration or password reset. Signed-in users share one dataset, so changes from any account holder appear for everyone. Sign-in uses an HttpOnly session cookie, CSRF tokens, a 12-hour idle expiry, and per-IP throttling. The app does not store the password or session token in browser storage.
+
+For local XAMPP, add the account values in the ignored `server/config.local.php` created from `server/config.example.php`. Store a PHP `password_hash()` result in `account_password_hash`; never put the plain password in the PHP config or Git. Generate a hash with:
+
+```powershell
+php -r "echo password_hash('replace-with-a-long-password', PASSWORD_DEFAULT), PHP_EOL;"
+```
+
+For an existing database, run `php server/migrate.php` after making a full backup; it adds the login-throttle table after the existing schema migration. Fresh databases already include it in `server/sql/setup.sql`.
+
+Before public hosting, configure a unique strong password hash, a dedicated database and least-privilege database user, the exact HTTPS frontend origin in `allowed_origins`, and `secure_cookies` as `true`. Keep config files and database credentials outside public source control. The production API refuses plain HTTP when secure cookies are enabled. Use HTTPS for every subdomain before enabling HSTS. Back up the database regularly and verify a restore procedure.
+
+For this PHP/MySQL project, a shared PHP hosting plan with MariaDB/MySQL, PDO MySQL, and SSL is a suitable low-cost deployment. Hostinger is one example; any provider with those features works. Deploy the built frontend at the web root and the protected `server` directory alongside it so `/server/api` remains same-origin. Configure the real domain before building, and update the exact origin and database values on the host. No host, domain, or production credentials are configured in this repository. Capacitor builds need an absolute HTTPS API URL and an allowed app origin before packaging.
 
 ## Database structure
 

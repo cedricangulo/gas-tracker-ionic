@@ -24,8 +24,10 @@ import {
 } from 'ionicons/icons';
 import { provideRouter } from '@angular/router';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { signal } from '@angular/core';
 import { vi } from 'vitest';
 import { TrackerStore } from '../services/tracker-store';
+import { Auth } from '../services/auth';
 import { GeoService } from '../services/geo';
 import { createTestStore } from './context.test-support';
 addIcons({
@@ -55,6 +57,16 @@ export default [
   provideRouter([]),
   provideIonicAngular({ animated: false }),
   { provide: TrackerStore, useFactory: createTestStore },
+  {
+    provide: Auth,
+    useFactory: () => ({
+      authenticated: signal(false),
+      checking: signal(false),
+      error: signal(''),
+      login: vi.fn(async () => undefined),
+      logout: vi.fn(async () => undefined),
+    }),
+  },
   {
     provide: GeoService,
     useFactory: () => ({

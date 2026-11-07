@@ -1,4 +1,4 @@
 Options -Indexes
 RewriteEngine On
-RewriteRule ^api/(fillups|settings)\.php$ - [L]
+RewriteRule ^api/(auth|fillups|settings)\.php$ - [L]
 RewriteRule ^ - [F,L]

@@ -78,30 +78,173 @@ function db_number(mixed $value): float
 function cors(): void
 {
     $config = configuration();
+    $https =
+        strtolower(server_value('HTTPS')) === 'on' ||
+        server_value('REQUEST_SCHEME') === 'https' ||
+        server_value('SERVER_PORT') === '443';
+    if ($config['secure_cookies'] && !$https) {
+        respond(426, ['success' => false, 'message' => 'Connect securely to continue.']);
+    }
+    if ($https) {
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+    }
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
     $origin = server_value('HTTP_ORIGIN');
     $allowed = $config['allowed_origins'];
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
     if ($origin !== '' && in_array($origin, $allowed, true)) {
         header('Access-Control-Allow-Origin: ' . $origin);
         header('Vary: Origin');
+        header('Access-Control-Allow-Credentials: true');
     }
-    if (
-        $origin !== '' &&
-        !in_array($origin, $allowed, true) &&
-        in_array(server_value('REQUEST_METHOD'), ['POST', 'PUT', 'DELETE'], true)
-    ) {
+    if ($origin !== '' && !in_array($origin, $allowed, true)) {
         respond(403, [
             'success' => false,
             'message' => 'This app cannot connect from this address.',
         ]);
     }
-    header('Content-Type: application/json; charset=utf-8');
-    header('Cache-Control: no-store');
     header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+    header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token, X-Requested-With');
     if (server_value('REQUEST_METHOD') === 'OPTIONS') {
         http_response_code(204);
         exit();
     }
+}
+
+function start_auth_session(): void
+{
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        return;
+    }
+    $config = configuration();
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+    session_name('gas_tracker_session');
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'secure' => $config['secure_cookies'],
+        'httponly' => true,
+        'samesite' => $config['secure_cookies'] ? 'None' : 'Lax',
+    ]);
+    if (!session_start()) {
+        throw new RuntimeException('Could not start a secure session.');
+    }
+}
+
+function csrf_token(): string
+{
+    start_auth_session();
+    $token = $_SESSION['csrf_token'] ?? null;
+    if (!is_string($token) || strlen($token) < 32) {
+        $token = bin2hex(random_bytes(32));
+        $_SESSION['csrf_token'] = $token;
+    }
+    return $token;
+}
+
+function require_csrf(): void
+{
+    $expected = csrf_token();
+    $provided = server_value('HTTP_X_CSRF_TOKEN');
+    if ($provided === '' || !hash_equals($expected, $provided)) {
+        throw new InputError(419, 'Refresh the page and try again.');
+    }
+}
+
+function has_authenticated_session(): bool
+{
+    start_auth_session();
+    $expiresAt = $_SESSION['expires_at'] ?? null;
+    if (
+        ($_SESSION['authenticated'] ?? false) !== true ||
+        !is_int($expiresAt) ||
+        $expiresAt <= time()
+    ) {
+        unset($_SESSION['authenticated'], $_SESSION['expires_at']);
+        return false;
+    }
+    $_SESSION['expires_at'] = time() + 43200;
+    return true;
+}
+
+function require_authenticated(): void
+{
+    if (!has_authenticated_session()) {
+        throw new InputError(401, 'Sign in to continue.');
+    }
+}
+
+function login_client_key(): string
+{
+    return hash('sha256', server_value('REMOTE_ADDR', 'unknown'));
+}
+
+function assert_login_allowed(PDO $pdo, string $clientKey): void
+{
+    $pdo->beginTransaction();
+    $pdo->prepare(
+        'INSERT IGNORE INTO auth_login_attempts (client_key, attempts, window_started_at) VALUES (?, 0, UTC_TIMESTAMP())',
+    )->execute([$clientKey]);
+    $statement = $pdo->prepare(
+        'SELECT attempts, window_started_at, blocked_until FROM auth_login_attempts WHERE client_key = ? FOR UPDATE',
+    );
+    $statement->execute([$clientKey]);
+    $row = $statement->fetch();
+    if (!is_array($row)) {
+        $pdo->rollBack();
+        throw new RuntimeException('Could not check sign-in attempts.');
+    }
+    $blockedUntil = $row['blocked_until'];
+    if ($blockedUntil !== null && $blockedUntil > gmdate('Y-m-d H:i:s')) {
+        $pdo->commit();
+        throw new InputError(429, 'Too many tries. Wait a little, then try again.');
+    }
+    if ($row['window_started_at'] < gmdate('Y-m-d H:i:s', time() - 900)) {
+        $pdo->prepare(
+            'UPDATE auth_login_attempts SET attempts = 0, window_started_at = UTC_TIMESTAMP(), blocked_until = NULL WHERE client_key = ?',
+        )->execute([$clientKey]);
+    }
+    $pdo->commit();
+}
+
+function record_login_attempt(PDO $pdo, string $clientKey, bool $success): void
+{
+    $pdo->beginTransaction();
+    if ($success) {
+        $pdo->prepare('DELETE FROM auth_login_attempts WHERE client_key = ?')->execute([
+            $clientKey,
+        ]);
+        $pdo->commit();
+        return;
+    }
+    $pdo->prepare(
+        'INSERT IGNORE INTO auth_login_attempts (client_key, attempts, window_started_at) VALUES (?, 0, UTC_TIMESTAMP())',
+    )->execute([$clientKey]);
+    $statement = $pdo->prepare(
+        'SELECT attempts, window_started_at FROM auth_login_attempts WHERE client_key = ? FOR UPDATE',
+    );
+    $statement->execute([$clientKey]);
+    $row = $statement->fetch();
+    if (!is_array($row)) {
+        $pdo->rollBack();
+        throw new RuntimeException('Could not record sign-in attempts.');
+    }
+    if (!is_numeric($row['attempts'] ?? null) || !is_string($row['window_started_at'] ?? null)) {
+        $pdo->rollBack();
+        throw new RuntimeException('Sign-in attempt data is invalid.');
+    }
+    $attempts =
+        $row['window_started_at'] < gmdate('Y-m-d H:i:s', time() - 900)
+            ? 1
+            : (int) (float) $row['attempts'] + 1;
+    $blockedUntil = $attempts >= 10 ? gmdate('Y-m-d H:i:s', time() + 900) : null;
+    $pdo->prepare(
+        'UPDATE auth_login_attempts SET attempts = ?, window_started_at = IF(? = 1, UTC_TIMESTAMP(), window_started_at), blocked_until = ? WHERE client_key = ?',
+    )->execute([$attempts, $attempts, $blockedUntil, $clientKey]);
+    $pdo->commit();
 }
 
 /** @return array<string, mixed> */

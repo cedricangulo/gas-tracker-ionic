@@ -3,13 +3,14 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
-import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { readFileSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 
 const php = process.env.PHP_BINARY || 'php';
 const database = 'gas_tracker_test_' + randomUUID().replaceAll('-', '');
 const root = resolve('server');
+const sessionDirectory = resolve('artifacts/php-sessions-' + randomUUID());
 let server;
 let count = 0;
 const results = [];
@@ -40,11 +41,26 @@ try {
       '$s=stream_socket_server("tcp://127.0.0.1:0"); echo parse_url("tcp://".stream_socket_get_name($s,false),PHP_URL_PORT);',
     ),
   );
-  server = spawn(php, ['-S', '127.0.0.1:' + port, '-t', root], {
-    env: { ...process.env, GAS_TRACKER_DB: database },
-    stdio: ['ignore', 'ignore', 'pipe'],
-    windowsHide: true,
-  });
+  const testPassword = 'Integration-Only-Password-84!';
+  const testPasswordHash = runPhp(
+    'echo password_hash(' + JSON.stringify(testPassword) + ', PASSWORD_DEFAULT);',
+  );
+  mkdirSync(sessionDirectory, { recursive: true });
+  server = spawn(
+    php,
+    ['-d', 'session.save_path=' + sessionDirectory, '-S', '127.0.0.1:' + port, '-t', root],
+    {
+      env: {
+        ...process.env,
+        GAS_TRACKER_DB: database,
+        GAS_TRACKER_ACCOUNT_USERNAME: 'owner',
+        GAS_TRACKER_ACCOUNT_PASSWORD_HASH: testPasswordHash,
+        GAS_TRACKER_SECURE_COOKIES: 'false',
+      },
+      stdio: ['ignore', 'ignore', 'pipe'],
+      windowsHide: true,
+    },
+  );
   let serverErrors = '';
   server.stderr.on('data', (chunk) => {
     serverErrors += chunk.toString();
@@ -53,7 +69,7 @@ try {
   let ready = false;
   for (let i = 0; i < 40; i++) {
     try {
-      if ((await fetch(base + 'settings.php')).ok) {
+      if ((await fetch(base + 'auth.php')).ok) {
         ready = true;
         break;
       }
@@ -61,10 +77,21 @@ try {
     await delay(150);
   }
   assert.ok(ready, 'PHP server did not start: ' + serverErrors);
+  let sessionCookie = '';
+  let csrfToken = '';
   async function request(path, method = 'GET', body, extra = {}) {
+    const headers = {
+      'Content-Type': 'application/json',
+      Origin: 'http://localhost:8100',
+      ...(sessionCookie ? { Cookie: sessionCookie } : {}),
+      ...extra,
+    };
+    if (method !== 'GET' && csrfToken && headers['X-CSRF-Token'] === undefined) {
+      headers['X-CSRF-Token'] = csrfToken;
+    }
     const res = await fetch(base + path, {
       method,
-      headers: { 'Content-Type': 'application/json', ...extra },
+      headers,
       ...(body !== undefined
         ? { body: typeof body === 'string' ? body : JSON.stringify(body) }
         : {}),
@@ -76,8 +103,50 @@ try {
     } catch {
       throw new Error('Non-JSON response: ' + text);
     }
+    const setCookie = res.headers.get('set-cookie');
+    if (setCookie) sessionCookie = setCookie.split(';', 1)[0];
+    if (data?.data?.csrfToken) csrfToken = data.data.csrfToken;
     return { status: res.status, body: data, headers: res.headers };
   }
+  await check('API requires login and issues a CSRF token', async () => {
+    assert.equal((await request('settings.php')).status, 401);
+    assert.equal((await request('fillups.php')).status, 401);
+    const status = await request('auth.php');
+    assert.equal(status.status, 200);
+    assert.equal(status.body.data.authenticated, false);
+    assert.ok(status.body.data.csrfToken.length >= 32);
+    assert.equal(status.headers.get('access-control-allow-credentials'), 'true');
+  });
+  await check('Mutations reject missing CSRF tokens', async () => {
+    const response = await fetch(base + 'auth.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: 'http://localhost:8100' },
+      body: JSON.stringify({ action: 'login', username: 'owner', password: testPassword }),
+    });
+    assert.equal(response.status, 419);
+  });
+  await check(
+    'Shared account rejects incorrect credentials and accepts the configured account',
+    async () => {
+      assert.equal(
+        (
+          await request('auth.php', 'POST', {
+            action: 'login',
+            username: 'owner',
+            password: 'wrong',
+          })
+        ).status,
+        401,
+      );
+      const signedIn = await request('auth.php', 'POST', {
+        action: 'login',
+        username: 'owner',
+        password: testPassword,
+      });
+      assert.equal(signedIn.status, 200);
+      assert.equal(signedIn.body.data.authenticated, true);
+    },
+  );
   const defaults = (await request('settings.php')).body.data;
   const id = randomUUID();
   const fill = {
@@ -371,6 +440,11 @@ try {
       assert.ok(result.body.data.stations.includes('NEIGHBORHOOD PUMP'));
     },
   );
+  await check('Logout revokes access to the shared dataset', async () => {
+    assert.equal((await request('auth.php', 'POST', { action: 'logout' })).status, 200);
+    assert.equal((await request('settings.php')).status, 401);
+    assert.equal((await request('auth.php')).body.data.authenticated, false);
+  });
   mkdirSync('artifacts', { recursive: true });
   writeFileSync(
     'artifacts/api-results.json',
@@ -379,6 +453,7 @@ try {
   console.log(count + ' API checks passed.');
 } finally {
   server?.kill();
+  rmSync(sessionDirectory, { recursive: true, force: true });
   // Only the exact randomly named database created above is eligible for cleanup.
   assert.match(database, /^gas_tracker_test_[a-f0-9]{32}$/);
   runPhp(configCode + '$pdo->exec("DROP DATABASE ' + database + '");');

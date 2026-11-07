@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
 import { firstValueFrom, timeout } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ApiResponse, BikeSettings, Fillup, Mutation } from '../models/tracker';
@@ -17,11 +18,25 @@ export class ApiError extends Error {
 export class ApiService {
   private readonly http = inject(HttpClient);
   readonly baseUrl = environment.apiBaseUrl.replace(/\/$/, '');
-  private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  private csrfToken = '';
+  onUnauthorized: (() => void) | null = null;
+  private async request<T>(
+    method: string,
+    path: string,
+    body?: unknown,
+    retryAfterCsrfRefresh = true,
+  ): Promise<T> {
     try {
       const response = await firstValueFrom(
         this.http
-          .request<ApiResponse<T>>(method, this.baseUrl + path, { body })
+          .request<ApiResponse<T>>(method, this.baseUrl + path, {
+            body,
+            withCredentials: true,
+            headers:
+              method === 'GET' || !this.csrfToken
+                ? undefined
+                : new HttpHeaders({ 'X-CSRF-Token': this.csrfToken }),
+          })
           .pipe(timeout(12000)),
       );
       if (!response.success)
@@ -30,16 +45,21 @@ export class ApiService {
     } catch (error) {
       if (error instanceof ApiError) throw error;
       if (error instanceof HttpErrorResponse) {
-        const body = error.error as ApiResponse<unknown> | null;
-        const details = body?.errors ? Object.values(body.errors).join(' ') : '';
+        if (error.status === 419 && retryAfterCsrfRefresh) {
+          await this.authStatus();
+          return this.request<T>(method, path, body, false);
+        }
+        if (error.status === 401 && path !== '/auth.php') this.onUnauthorized?.();
+        const errorBody = error.error as ApiResponse<unknown> | null;
+        const details = errorBody?.errors ? Object.values(errorBody.errors).join(' ') : '';
         throw new ApiError(
           details ||
-            body?.message ||
+            errorBody?.message ||
             (error.status === 0
               ? 'Cannot connect. Your changes are saved on this device.'
               : 'Could not complete the request. Try again.'),
           error.status,
-          body?.errors,
+          errorBody?.errors,
         );
       }
       throw new ApiError('Connection timed out. Your changes are saved on this device.', 0);
@@ -50,6 +70,31 @@ export class ApiService {
   }
   settings(): Promise<BikeSettings> {
     return this.request('GET', '/settings.php');
+  }
+  async authStatus(): Promise<{ authenticated: boolean }> {
+    const response = await this.request<{ authenticated: boolean; csrfToken: string }>(
+      'GET',
+      '/auth.php',
+    );
+    this.csrfToken = response.csrfToken;
+    return { authenticated: response.authenticated };
+  }
+  async login(username: string, password: string): Promise<void> {
+    if (!this.csrfToken) await this.authStatus();
+    const response = await this.request<{ authenticated: boolean; csrfToken: string }>(
+      'POST',
+      '/auth.php',
+      { action: 'login', username, password },
+    );
+    this.csrfToken = response.csrfToken;
+  }
+  async logout(): Promise<void> {
+    const response = await this.request<{ authenticated: boolean; csrfToken: string }>(
+      'POST',
+      '/auth.php',
+      { action: 'logout' },
+    );
+    this.csrfToken = response.csrfToken;
   }
   async renameStation(from: string, to: string, operationId: string): Promise<BikeSettings> {
     try {
