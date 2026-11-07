@@ -1,0 +1,48 @@
+<ion-content>
+  <main class="login-wrap">
+    <section class="card login-card">
+      <header class="page-top"><h1>Sign in</h1></header>
+      <p class="subheading">Enter your account details to continue.</p>
+      <form class="stack" autocomplete="off" (ngSubmit)="signIn()">
+        @if (auth.error()) {
+          <p class="form-error" role="alert">{{ auth.error() }}</p>
+        }
+        <div class="field">
+          <label for="username">Username</label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            autocomplete="off"
+            autocapitalize="none"
+            spellcheck="false"
+            required
+            maxlength="80"
+            [ngModel]="username()"
+            (ngModelChange)="username.set($event)"
+          />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="off"
+            required
+            [ngModel]="password()"
+            (ngModelChange)="password.set($event)"
+          />
+        </div>
+        <button
+          class="button wide"
+          type="submit"
+          [disabled]="busy() || !username() || !password()"
+          [attr.aria-busy]="busy()"
+        >
+          {{ busy() ? 'Signing in…' : 'Sign in' }}
+        </button>
+      </form>
+    </section>
+  </main>
+</ion-content>

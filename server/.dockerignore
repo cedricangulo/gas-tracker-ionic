@@ -1,0 +1,4 @@
+vendor
+tests
+config.local.php
+.git

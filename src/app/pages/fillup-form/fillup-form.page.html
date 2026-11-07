@@ -1,0 +1,228 @@
+<ion-content
+  ><main class="page form-page">
+    <header class="page-top">
+      <div class="row">
+        <a class="icon-button" routerLink="/log" aria-label="Back to fill-up log"
+          ><ion-icon name="arrow-back-outline" aria-hidden="true"
+        /></a>
+        <div>
+          <h1>{{ editing() ? 'Edit fill-up' : 'New fill-up' }}</h1>
+        </div>
+      </div>
+    </header>
+    <app-sync-banner />
+    @if (missing() && !store.remoteChecked()) {
+      <section class="card empty" role="status"><h2>Loading fill-up…</h2></section>
+    } @else if (missing()) {
+      <section class="card empty">
+        <h2>Entry not found.</h2>
+        <p>This fill-up may have been deleted.</p>
+        <a class="button secondary" routerLink="/log">Back to log</a>
+      </section>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="save()" class="entry-form">
+        @if (error()) {
+          <p class="form-error" role="alert" tabindex="-1">{{ error() }}</p>
+        }
+        <section class="amount-section">
+          <label for="amount" class="eyebrow">Amount</label>
+          <div class="amount-input">
+            <span aria-hidden="true">₱</span
+            ><input
+              id="amount"
+              type="number"
+              inputmode="decimal"
+              min=".01"
+              max="99999999"
+              step=".01"
+              formControlName="amount"
+              [attr.aria-invalid]="invalid('amount')"
+              aria-label="Amount in Philippine pesos"
+            />
+          </div>
+          <div class="chips quick-amounts">
+            @for (amount of quickAmounts; track amount) {
+              <button
+                type="button"
+                class="chip"
+                [class.selected]="form.controls.amount.value === amount"
+                (click)="selectAmount(amount)"
+              >
+                ₱{{ amount }}
+              </button>
+            }
+          </div>
+          @if (invalid('amount')) {
+            <p class="field-error">Enter an amount greater than zero.</p>
+          }
+        </section>
+        <section class="form-section">
+          <div class="section-heading">
+            <h2>Fuel</h2>
+          </div>
+          <div class="field">
+            <label for="liters">Liters <span>Optional</span></label>
+            <div class="liters-row">
+              <input
+                id="liters"
+                type="number"
+                inputmode="decimal"
+                min=".001"
+                max="99999"
+                step=".001"
+                placeholder="0.000"
+                formControlName="liters"
+                [attr.aria-invalid]="invalid('liters')"
+              /><span class="price-preview mono">{{
+                pricePerLiter !== null
+                  ? (pricePerLiter | currency: 'PHP' : 'symbol' : '1.2-2') + ' / L'
+                  : '— / L'
+              }}</span>
+            </div>
+            @if (invalid('liters')) {
+              <p class="field-error">Liters must be greater than zero, or left blank.</p>
+            }
+          </div>
+          <div class="field gauge-field">
+            <span class="field-label">Gauge after filling <span>Optional</span></span>
+            <div class="chips gauge-selector" aria-label="Gauge after filling">
+              @for (bar of bars; track bar) {
+                <button
+                  type="button"
+                  class="chip"
+                  [class.selected]="form.controls.gaugeLevel.value === bar"
+                  [class.lit]="bar > 0 && bar <= (form.controls.gaugeLevel.value ?? 0)"
+                  [attr.aria-pressed]="form.controls.gaugeLevel.value === bar"
+                  (click)="selectGauge(bar)"
+                >
+                  {{ bar === 0 ? 'E' : bar }}
+                </button>
+              }
+            </div>
+            <p class="field-help">Tap the selected level to clear it.</p>
+          </div>
+          <label class="full-toggle" for="full-tank"
+            ><div>
+              <strong>Filled to full</strong><span>Measures fuel use between full tanks.</span>
+            </div>
+            <input id="full-tank" type="checkbox" formControlName="filledToFull"
+          /></label>
+        </section>
+        <section class="form-section">
+          <div class="section-heading">
+            <h2>Details</h2>
+          </div>
+          <div class="stack">
+            <div class="field">
+              <label for="datetime">Date &amp; time</label
+              ><input
+                id="datetime"
+                type="datetime-local"
+                formControlName="dateTime"
+                [attr.aria-invalid]="invalid('dateTime')"
+              />
+            </div>
+            <div class="field">
+              <label for="odometer">Odometer <span>km · Optional</span></label
+              ><input
+                id="odometer"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                max="999999999"
+                step=".1"
+                placeholder="e.g. 1250.0"
+                formControlName="odometer"
+                [attr.aria-invalid]="invalid('odometer')"
+              />
+              <p class="field-help">The total distance on your motorcycle’s dashboard.</p>
+            </div>
+            <div class="field">
+              <span class="field-label">Station <span>Optional</span></span>
+              <div class="chips" aria-label="Station">
+                @for (station of stations(); track station) {
+                  <button
+                    type="button"
+                    class="chip"
+                    [class.selected]="form.controls.station.value === station"
+                    [attr.aria-pressed]="form.controls.station.value === station"
+                    (click)="selectStation(station)"
+                  >
+                    {{ station }}
+                  </button>
+                }
+                <button type="button" class="chip" (click)="addChoice('stations')">+ Add</button>
+              </div>
+            </div>
+            <div class="field">
+              <span class="field-label">Fuel grade <span>Optional</span></span>
+              <div class="chips" aria-label="Fuel grade">
+                @for (grade of grades(); track grade) {
+                  <button
+                    type="button"
+                    class="chip"
+                    [class.selected]="form.controls.grade.value === grade"
+                    [attr.aria-pressed]="form.controls.grade.value === grade"
+                    (click)="selectGrade(grade)"
+                  >
+                    {{ grade }}
+                  </button>
+                }
+                <button type="button" class="chip" (click)="addChoice('grades')">+ Add</button>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="form-section">
+          <div class="section-heading">
+            <h2>Location</h2>
+          </div>
+          <button
+            type="button"
+            class="button secondary wide"
+            (click)="captureLocation()"
+            [disabled]="locating()"
+          >
+            <ion-icon name="location-outline" aria-hidden="true" />{{
+              locating()
+                ? 'Finding your location…'
+                : location()
+                  ? 'Update location'
+                  : 'Use my location'
+            }}
+          </button>
+          @if (location(); as coordinates) {
+            <div class="location-confirm">
+              <ion-icon name="checkmark-outline" aria-hidden="true" />
+              <div>
+                <strong>Location captured</strong
+                ><span class="mono"
+                  >{{ coordinates.latitude | number: '1.5-5' }},
+                  {{ coordinates.longitude | number: '1.5-5' }}</span
+                >
+              </div>
+              <button
+                type="button"
+                class="text-button"
+                (click)="removeLocation()"
+                aria-label="Remove captured location"
+              >
+                Remove
+              </button>
+            </div>
+          }
+          @if (locationError()) {
+            <p class="field-error" role="alert">
+              {{ locationError() }}
+            </p>
+          }
+        </section>
+        <button type="submit" class="button wide" [disabled]="busy() || locating()">
+          <ion-icon name="checkmark-outline" aria-hidden="true" />{{
+            busy() ? 'Saving…' : editing() ? 'Save changes' : 'Save fill-up'
+          }}
+        </button>
+      </form>
+    }
+  </main></ion-content
+>

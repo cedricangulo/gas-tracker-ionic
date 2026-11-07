@@ -1,0 +1,136 @@
+.settings-mark {
+  color: var(--muted);
+  font-size: 28px;
+}
+.appearance {
+  margin-bottom: 18px;
+}
+.appearance h2 {
+  font-size: 23px;
+}
+.appearance p {
+  margin-bottom: 17px;
+}
+.appearance .chips {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.bike-form {
+  display: grid;
+  gap: 23px;
+}
+.bike-form h2 {
+  margin-top: 7px;
+}
+.bike-form .section-heading {
+  margin-bottom: 0;
+  align-items: center;
+}
+.derived {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.derived p {
+  margin: 5px 0 0;
+  font-size: 11px;
+}
+.derived strong {
+  font-size: 26px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.derived small {
+  font:
+    13px 'Barlow',
+    sans-serif;
+}
+.compatibility {
+  margin-top: 20px;
+  display: flex;
+  align-items: start;
+  gap: 12px;
+}
+.compatibility ion-icon {
+  flex-shrink: 0;
+  font-size: 20px;
+}
+.compatibility p {
+  margin: 5px 0 0;
+}
+
+.stations {
+  margin-top: 18px;
+}
+.settings-account-action {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  margin-top: 18px;
+}
+.settings-account-action .destructive {
+  background: var(--danger);
+  color: #fff;
+}
+.settings-account-action .form-error {
+  width: 100%;
+}
+.stations .section-heading {
+  align-items: center;
+  margin-bottom: 8px;
+}
+.stations .text-button {
+  min-height: 44px;
+}
+.stations h2 {
+  margin: 0;
+  font-size: 23px;
+}
+.stations > .form-error {
+  margin: 12px 0;
+}
+.station-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.station-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  border-top: 1px solid var(--line);
+}
+.station-list li:first-child {
+  border-top: 0;
+}
+.station-name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+.station-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 12px;
+}
+.station-actions .text-button {
+  min-height: 44px;
+  font-size: 13px;
+}
+@media (max-width: 360px) {
+  .station-list li {
+    align-items: start;
+    flex-direction: column;
+    gap: 0;
+    padding-top: 10px;
+  }
+  .station-actions {
+    align-self: flex-end;
+  }
+}

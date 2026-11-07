@@ -1,0 +1,134 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "app": {
+      "projectType": "application",
+      "schematics": {
+        "@ionic/angular-toolkit:page": {
+          "styleext": "scss",
+          "standalone": true
+        }
+      },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": {
+              "base": "www",
+              "browser": ""
+            },
+            "index": "src/index.html",
+            "polyfills": ["zone.js"],
+            "tsConfig": "tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
+              },
+              {
+                "input": "public",
+                "glob": "**/*"
+              }
+            ],
+            "styles": ["src/global.scss", "src/theme/variables.scss"],
+            "scripts": [],
+            "browser": "src/main.ts",
+            "allowedCommonJsDependencies": [
+              "leaflet",
+              "leaflet.heat",
+              "localforage",
+              "@ionic/storage"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kb",
+                  "maximumError": "6kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
+              "outputHashing": "all",
+              "serviceWorker": "ngsw-config.json"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.development.ts"
+                }
+              ]
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "app:build:production"
+            },
+            "development": {
+              "buildTarget": "app:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular/build:extract-i18n",
+          "options": {
+            "buildTarget": "app:build"
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "::development",
+            "setupFiles": ["src/test-setup.ts"],
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "providersFile": "src/app/testing/providers.test-support.ts"
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "schematicCollections": ["@ionic/angular-toolkit"],
+    "analytics": false,
+    "packageManager": "pnpm"
+  },
+  "schematics": {
+    "@ionic/angular-toolkit:component": {
+      "styleext": "scss",
+      "standalone": true
+    },
+    "@ionic/angular-toolkit:page": {
+      "styleext": "scss",
+      "standalone": true
+    }
+  }
+}

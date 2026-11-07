@@ -1,0 +1,14 @@
+<span
+  class="fuel-strip"
+  [class.vertical]="vertical()"
+  role="img"
+  [attr.aria-label]="
+    level() === null ? 'Gauge not recorded' : level() + ' of ' + max() + ' fuel bars'
+  "
+>
+  <span class="fuel-edge" aria-hidden="true">E</span>
+  @for (bar of bars(); track bar) {
+    <span class="pip" [class.on]="level() !== null && bar < level()!" aria-hidden="true"></span>
+  }
+  <span class="fuel-edge" aria-hidden="true">F</span>
+</span>

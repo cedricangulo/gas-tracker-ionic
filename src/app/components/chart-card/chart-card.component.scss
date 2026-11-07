@@ -1,0 +1,67 @@
+.chart-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.chart-title h2 {
+  font-size: 24px;
+}
+.chart-card > p {
+  font-size: 12px;
+  margin-bottom: 24px;
+}
+.chart-area {
+  height: 210px;
+  position: relative;
+}
+.chart-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--surface);
+  color: var(--muted);
+}
+.chart-empty .mono {
+  font-size: 30px;
+}
+.chart-empty p {
+  font-size: 14px;
+  margin: 12px 0 5px;
+}
+.chart-empty small {
+  font-size: 12px;
+}
+details {
+  margin-top: 17px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+summary {
+  cursor: pointer;
+  min-height: 28px;
+  padding: 5px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-weight: 400;
+}
+td {
+  text-align: right;
+  font-family: var(--mono);
+}
+thead th {
+  font-weight: 600;
+}

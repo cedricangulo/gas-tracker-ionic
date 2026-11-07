@@ -1,0 +1,42 @@
+<ion-content
+  ><main class="page">
+    <header class="page-top">
+      <div>
+        <h1>Charts</h1>
+      </div>
+      <span class="badge accent">{{ store.fills().length }} entries</span>
+    </header>
+    <app-sync-banner />
+    <div class="stack">
+      <app-chart-card
+        title="Distance per month"
+        [subtitle]="estimates() ? '* Includes estimated distance.' : 'From odometer readings.'"
+        [labels]="months()"
+        [values]="distances()"
+        unit="km"
+      />
+      <app-chart-card
+        title="Price per liter"
+        subtitle="Price for each fill-up."
+        kind="line"
+        [labels]="fillDates()"
+        [values]="literPrices()"
+        unit="₱/L"
+      />
+      <app-chart-card
+        title="Cost per kilometer"
+        subtitle="Estimated from gauge readings and fuel prices."
+        kind="line"
+        [labels]="stretchDates()"
+        [values]="kilometerCosts()"
+        unit="₱/km"
+      />
+      <app-chart-card
+        title="Monthly spend"
+        subtitle="Fuel spending by month."
+        [labels]="months()"
+        [values]="spend()"
+        unit="₱"
+      />
+    </div></main
+></ion-content>
