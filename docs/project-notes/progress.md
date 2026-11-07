@@ -1,20 +1,22 @@
 # Progress
 
+> Historical development notes. Verification totals and deferred-work status below describe the project at those dates; use `../TESTING.md` and current checks for submission claims.
+
 ## 2026-11-06 — Complete
 
 - Read prompt.md, the desktop course brief, main reference implementation, and lecture API.
 - Confirmed six-screen scope, personal single-bike dataset, Ionic-first workflow, later APK/report, and XAMPP/MySQL.
-- Relocated repository including Git metadata to D:/xampp/htdocs/gas-tracker-mobile.
+- Relocated the repository including Git metadata under the XAMPP web root.
 - Reinitialized using ionic start; used ionic generate for pages, components, services, models, guard, spec/test-support shells; initialized Capacitor using CLI and offline app shell using ng add @angular/pwa.
 - Implemented Home, Charts, Log, Settings, new/edit fill-up, Leaflet map/heatmap, optional Geolocation, haptics, typed math, durable IndexedDB queue, Web Locks/BroadcastChannel coordination, PHP/MySQL endpoints and transactionally idempotent receipts.
 - Started XAMPP Apache and MySQL, imported non-destructive setup SQL.
 - Generated a .spec.ts beside all six pages, all five shared components, and the app root. Added meaningful DOM/form/navigation/accessibility tests using Node/jsdom.
 - Completed independent read-only code review; fixed identified ordering/security/hydration/map issues and added regressions. Re-review confirmed no remaining critical/important ordering issue.
-- Wrote README.md with setup, API URL configuration, offline behavior, math semantics, exact vehicle notice, generators, tests and later native packaging steps.
+- Wrote `../README.md` with setup, API URL configuration, offline behavior, math semantics, vehicle notice, generators, tests and later native packaging steps.
 - Production build: PASS, final output www/. Angular type-check: PASS.
 - Domain/offline: 36/36 PASS. Component specs: 26/26 PASS in 12 files. PHP validation: 16/16 PASS with 20 assertions. PHPStan level 9: PASS, no errors. Real PHP/MySQL HTTP integration: 13/13 PASS.
 - API tests create/drop only a unique gas_tracker_test_* database; personal gas_tracker data remains unseeded.
-- Ionic CLI startup: PASS, http://127.0.0.1:8100 returns 200 and expected app title.
+- Ionic CLI startup: PASS; the local app returned HTTP 200 with the expected title.
 - Apache API GET endpoints: 200. Config example, SQL setup, internal helper and .git/HEAD URLs: 403.
 - Browser/visual/native tests were not run, as requested. Chart/map painting is isolated in jsdom unit tests.
 - Development server left running on port 8100. Reopen the relocated folder as the editor workspace.
