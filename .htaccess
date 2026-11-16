@@ -1,0 +1,5 @@
+Options -Indexes
+# Serve the PHP API only. The Ionic frontend runs on port 8100.
+RewriteEngine On
+RewriteRule ^server/api/(auth|fillups|settings)\.php$ - [L]
+RewriteRule ^ - [F,L]

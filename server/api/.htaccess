@@ -1,0 +1,4 @@
+Options -Indexes
+<FilesMatch "^(config|helpers)\.php$">
+  Require all denied
+</FilesMatch>

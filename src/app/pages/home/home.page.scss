@@ -1,0 +1,178 @@
+.instrument {
+  --digit-ghost: #b6c0b4;
+  padding: 15px;
+  border-radius: 18px;
+  background: #252a29;
+  border: 1px solid #404745;
+  box-shadow:
+    0 5px 0 #151918,
+    0 10px 25px #0002;
+  color: #c4c8c4;
+}
+.telltales {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  padding: 0 0 12px;
+  font: 9px var(--mono);
+  letter-spacing: 0.05em;
+  color: #737d74;
+}
+.telltales .lit {
+  color: #c7bd7e;
+}
+.lcd {
+  padding: 15px 14px 10px;
+  border: 3px solid #111715;
+  border-radius: 11px;
+  background: #c7d0c3;
+  color: #29382d;
+}
+.lcd-top {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  gap: 15px;
+  align-items: end;
+}
+.dash-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font: 10px var(--mono);
+}
+.dash-gauge app-gauge {
+  height: auto;
+}
+.digits {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.unit {
+  text-align: right;
+  font: 13px var(--mono);
+  margin-bottom: 6px;
+}
+.instrument-readings {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+  text-align: right;
+}
+.instrument-readings dt {
+  font-size: 8px;
+  letter-spacing: 0.1em;
+}
+.instrument-readings dd {
+  font: 12px var(--mono);
+  margin: 3px 0 0;
+}
+.scale {
+  display: flex;
+  align-items: end;
+  gap: 2px;
+  height: 13px;
+  margin-top: 18px;
+}
+.scale i {
+  flex: 1;
+  height: 8px;
+  background: #a5b1a2;
+}
+.scale .on {
+  background: #29382d;
+}
+.scale .benchmark {
+  height: 13px;
+  background: #7a5224;
+}
+.scale-labels {
+  display: flex;
+  justify-content: space-between;
+  font: 9px var(--mono);
+  margin-top: 5px;
+}
+.instrument-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 8px;
+  letter-spacing: 0.11em;
+  margin-top: 12px;
+  gap: 8px;
+}
+.efficiency-note {
+  margin: 17px 0 23px;
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.efficiency-note .badge {
+  white-space: nowrap;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.stat {
+  padding: 19px;
+}
+.stat-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--muted);
+}
+.stat-label ion-icon {
+  font-size: 18px;
+}
+.stat > strong {
+  display: block;
+  font-family: var(--mono);
+  font-size: clamp(22px, 4.4vw, 30px);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  margin: 15px 0 7px;
+}
+.stat strong small {
+  font:
+    12px 'Barlow',
+    sans-serif;
+  letter-spacing: 0;
+}
+.stat-foot {
+  font-size: 11px;
+  color: var(--muted);
+}
+.latest {
+  margin-bottom: 16px;
+}
+.latest p {
+  margin-top: 6px;
+}
+.latest h2 {
+  font-size: 23px;
+}
+@media (max-width: 390px) {
+  .lcd-top {
+    gap: 8px;
+  }
+  .instrument-readings dd {
+    font-size: 11px;
+  }
+  .stat {
+    padding: 16px;
+  }
+  .stat-foot {
+    font-size: 10px;
+  }
+  .telltales {
+    gap: 10px;
+  }
+}

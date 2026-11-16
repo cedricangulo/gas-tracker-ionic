@@ -1,0 +1,8 @@
+{
+  "name": "Gas Tracker",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone",
+  "npmClient": "pnpm"
+}

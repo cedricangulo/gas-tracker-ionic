@@ -1,0 +1,41 @@
+<article class="card chart-card">
+  <div class="chart-title">
+    <h2>{{ title() }}</h2>
+    <span class="eyebrow">{{ unit() }}</span>
+  </div>
+  <p class="small muted">{{ subtitle() }}</p>
+  <div class="chart-area">
+    <canvas
+      #canvas
+      role="img"
+      [attr.aria-label]="title() + '. Values are available below.'"
+    ></canvas>
+    @if (!hasData()) {
+      <div class="chart-empty">
+        <span class="mono">—</span>
+        <p>No chart data yet</p>
+      </div>
+    }
+  </div>
+  @if (hasData()) {
+    <details>
+      <summary>View values</summary>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Period</th>
+            <th scope="col">{{ unit() }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (label of labels(); track $index; let i = $index) {
+            <tr>
+              <th scope="row">{{ label }}</th>
+              <td>{{ values()[i] !== null ? (values()[i] | number: '1.1-2') : '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </details>
+  }
+</article>

@@ -1,0 +1,39 @@
+:root {
+  --ion-font-family: 'Barlow', sans-serif;
+  --ion-color-primary: #7a5224;
+  --ion-color-primary-rgb: 122, 82, 36;
+  --ion-color-primary-contrast: #fff;
+  --ion-color-primary-shade: #69461f;
+  --ion-color-primary-tint: #87633a;
+  --ion-background-color: #e2e3e3;
+  --ion-text-color: #0e0f10;
+  --surface: #f7f7f6;
+  --muted: #46484b;
+  --line: #bfc0c0;
+  --soft: #d3d4d4;
+  --accent: #7a5224;
+  --accent-soft: #eee5d8;
+  --danger: #ae1f0b;
+  --good: #17602f;
+  --warn: #8f3d00;
+  --mono: 'Geist Mono Variable', monospace;
+}
+:root.night {
+  color-scheme: dark;
+  --ion-background-color: #0e0f10;
+  --ion-text-color: #f6f5f2;
+  --surface: #1b1d1f;
+  --muted: #b8babd;
+  --line: #45484b;
+  --soft: #2a2d30;
+  --accent: #d4ac72;
+  --accent-soft: #392c1c;
+  --danger: #ff9988;
+  --good: #83cb99;
+  --warn: #efb56c;
+  --ion-color-primary: #d4ac72;
+  --ion-color-primary-rgb: 212, 172, 114;
+  --ion-color-primary-contrast: #1a1206;
+  --ion-color-primary-shade: #bb9764;
+  --ion-color-primary-tint: #d8b480;
+}

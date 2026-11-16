@@ -1,0 +1,112 @@
+<ion-content [scrollEvents]="true" (ionScroll)="rememberScroll($event)">
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)"
+    ><ion-refresher-content
+  /></ion-refresher>
+  <main class="page">
+    <header class="page-top">
+      <div>
+        <h1>Fill-up log</h1>
+      </div>
+    </header>
+    <app-sync-banner />
+    @if (!rows().length) {
+      <section class="card empty">
+        <ion-icon class="empty-icon" name="receipt-outline" aria-hidden="true" />
+        <h2>No fill-ups yet</h2>
+        <p>Add a fill-up to start your log.</p>
+        <a class="button" routerLink="/fillup/new">Log your first fill-up</a>
+      </section>
+    }
+    <div class="stack">
+      @for (item of visibleRows(); track item.fill.id) {
+        @let fill = item.fill;
+        <article class="card fill-card">
+          <div class="fill-top">
+            <div>
+              <p class="eyebrow">
+                {{ fill.dateTime | date: 'MMM d, y' }}
+                <span class="time">{{ fill.dateTime | date: 'h:mm a' }}</span>
+              </p>
+              <h2>
+                {{ fill.station || 'Fill-up' }}
+                <span class="grade">{{ fill.grade || 'No grade' }}</span>
+              </h2>
+            </div>
+            <strong class="fill-amount mono">{{
+              fill.amount | currency: 'PHP' : 'symbol' : '1.2-2'
+            }}</strong>
+          </div>
+          <dl class="fill-details">
+            <div>
+              <dt>Liters</dt>
+              <dd>{{ fill.liters !== null ? (fill.liters | number: '1.3-3') + ' L' : '—' }}</dd>
+            </div>
+            <div>
+              <dt>Price / L</dt>
+              <dd>
+                {{
+                  fill.liters
+                    ? (fill.amount / fill.liters | currency: 'PHP' : 'symbol' : '1.2-2')
+                    : '—'
+                }}
+              </dd>
+            </div>
+            <div>
+              <dt>Odometer</dt>
+              <dd>
+                {{ fill.odometer !== null ? (fill.odometer | number: '1.0-1') + ' km' : '—' }}
+              </dd>
+            </div>
+            <div>
+              <dt>Since last</dt>
+              <dd>
+                {{ item.distance !== null ? '+' + (item.distance | number: '1.0-1') + ' km' : '—' }}
+              </dd>
+            </div>
+          </dl>
+          <div class="fill-bottom">
+            <div class="fill-tags">
+              <app-gauge [level]="fill.gaugeLevel" [max]="store.settings().gaugeSegments" />
+              @if (fill.filledToFull) {
+                <span class="badge accent">Full tank</span>
+              }
+              @if (store.isPending(fill.id)) {
+                <span class="badge pending">Waiting to sync</span>
+              }
+              @if (fill.latitude !== null) {
+                <span class="location-tag"
+                  ><ion-icon name="location-outline" aria-hidden="true" /> Pinned</span
+                >
+              }
+            </div>
+            <div class="row actions">
+              <a
+                class="icon-button"
+                [routerLink]="['/fillup', fill.id]"
+                [attr.aria-label]="'Edit fill-up from ' + (fill.dateTime | date: 'MMM d')"
+                ><ion-icon name="create-outline" aria-hidden="true" /></a
+              ><button
+                class="icon-button delete-button"
+                [disabled]="busy() === fill.id"
+                (click)="remove(fill)"
+                [attr.aria-label]="'Delete fill-up from ' + (fill.dateTime | date: 'MMM d')"
+              >
+                <ion-icon name="trash-outline" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+    @if (rows().length) {
+      <div class="list-load-more">
+        <p class="small muted" role="status" aria-live="polite" aria-atomic="true">
+          Showing {{ visibleRows().length }} of {{ rows().length }}
+        </p>
+        @if (visibleRows().length < rows().length) {
+          <button class="button secondary wide" (click)="loadMore()">Load more</button>
+        }
+      </div>
+    }
+  </main>
+</ion-content>
